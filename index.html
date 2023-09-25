@@ -1,111 +1,242 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <script>
-        function politics(){
-            document.getElementById('politics').innerHTML='Lorem ipsum dolor sit amet consectetur adipisicing elit. In repellendus blanditiis voluptate obcaecati tempora vel porro harum dolorum autem? Velit!,Lorem ipsum dolor sit amet consectetur adipisicing elit. In repellendus blanditiis voluptate obcaecati tempora vel porro harum dolorum autem? Velit!';
-            document.getElementById('politics').style.display='block';
-        }
-
-        function Fashion(){
-            document.getElementById('fashion').innerHTML='Fashion & LifeStyle dolor sit amet consectetur adipisicing elit. In repellendus blanditiis voluptate obcaecati tempora vel porro harum dolorum autem? Velit!,Lorem ipsum dolor sit amet consectetur adipisicing elit. In repellendus blanditiis voluptate obcaecati tempora vel porro harum dolorum autem? Velit!';
-            document.getElementById('fashion').style.display='block';
-        }
-
-        // function salesCalculator(){
-        //     const ProductName = 'Gucci';
-        //     const Price = 20000;
-        //     const Qty = 10;
-
-        //     const Amount = Price * Qty;
-        //     const Disc = Amount * 0.05;
-        //     const VAT = Amount * 0.05;
-        //     const Grosspay = Amount + VAT;
-        //     const Netpay = Grosspay -Disc; 
-
-        //     document.getElementById('ProductName').innerHTML='Product: '+ProductName;
-        //     document.getElementById('Price').innerHTML='Price : &#8358; '+ Price;
-        //     document.getElementById('Qty').innerHTML='Qty: '+ Qty;
-        //     document.getElementById('Amount').innerHTML= 'Amount:  '+Amount;
-        //     document.getElementById('Disc').innerHTML='Disc: '+Disc;
-        //     document.getElementById('VAT').innerHTML='VAT: '+VAT;
-        //     document.getElementById('Grosspay').innerHTML='Grosspay: '+Grosspay;
-        //     document.getElementById('Netpay').innerHTML='Netpay: '+Netpay;
-        // }
-
-    </script>
-
     <style>
+        body {
+            background: lightblue;
+            width: 100%;
+        }
         button{
-            width: 250px;
-            padding: 10px;
-            background: red;
-            border: none;
-            color: #fff;
-            font-size: 20px;
-            cursor: pointer;
+            background-color: red;
+            color: white;
+            font-weight: bold;
         }
 
-        .news{
-            background: #f7f7f7;
-            padding: 20px;
-            display: none;
+        @media screen and (min-width: 480px){
+            body {
+            background: gray;
+            width: auto;
+        }
         }
 
-        .container{
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .col-md-4{
-            background: #000;
-            width: 25%;
-            color: #fff;
-            /* height: 500px; */
-        }
-
-        .col-md-8{
-            width: 75%;
-            background: linear-gradient(rgb(243, 154, 154),rgb(173, 141, 248));
-            height: 200px;
-            
-        }
-        
     </style>
 </head>
+
 <body>
-    <h2>Blog</h2>
-    <h1>Trending News</h1>
-    <div class="container">
+    <h2>CAR LEASE CALCULATOR</h2>
+    <form action="" onkeyup="return leaseCalculator()">
+        <table>
+            <tr>
+                <td>
+                    <label for="CarName">Car Name</label>
+                    <input type="text" id="carName" value="" >
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                    <label for="Carprice">Car Price</label>
+                    <input type="number" id="carPrice" value="">
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                    <label for="Plate">Number Plate</label>
+                    <input type="number" id="plate" value="">
+                </td>
+            </tr>
+
+
+            <tr>
+                <td>
+                    <label for="Tracker">Tracker</label>
+                    <input type="number" id="tech" value="">
+                </td>
+            </tr>
+
+          
+            <tr>
+                <td>
+                    <label for="Vat">VAT</label>
+                    <input type="number" id="vat" value="">
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                    <label for="Risk">6% Risk Premium 1 And 2</label>
+                    <input type="number" id="risk">
+                </td>
+            </tr>
+
+
+            <tr>
+                <td>
+                    <label for="Upfront">5% Upfront Payment</label>
+                    <input type="number" id="upfront" >
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                    <label for="Tenor">Tenor In Months</label>
+                    <input type="number" id="months" >
+                </td>
+            </tr>
+
+            
+
+            <tr>
+                <td>
+                    <label for="Interest">3% Interest Rate</label>
+                    <input type="number" id="interest">
+                </td>
+            </tr>
+
         
-        
-        <div class="col-md-4">
-            <h2><button id="news" onclick="return Fashion()">Fashion Today + </button></h2>
-            <h2><button id="news" onclick="return politics()">Politics Today + </button></h2>
-        </div>
-        <div class="col-md-8">
-            <p class="news" id="politics"></p>
-            <p class="news" id="fashion"></p>
-        </div>
-    </div>
 
-    <!-- <p id="ProductName"></p>
-    <p id="Price"></p>
-    <p id="Qty"></p>
-    <p id="Amount"></p>
-    <p id="Disc"></p>
-    <p id="VAT"></p>
-    <p id="Grosspay"></p>
-    <p id="NetPay"></p> -->
+        </table>
 
+    </form>
 
-
-
-   
     
+
+<button onclick="return leaseCalculator()">Lease Calculator</button>
 </body>
+
+<script>
+    function leaseCalculator() {
+        var CarName = document.getElementById('carName').value;
+        var CarPrice = Number(document.getElementById('carPrice').value);
+        var NumberPlate = Number(document.getElementById('plate').value);
+        var Track = Number(document.getElementById('tech').value);
+        var Vat = Number(document.getElementById('vat').value);
+        var Upfrontper = Number(document.getElementById('upfront').value);
+        var myInterest = document.getElementById('interest').value;
+        var RiskPrime = document.getElementById('risk').value;
+        var Paymonth = document.getElementById('months').value;
+        
+
+        // var CarName = 'corola';
+        // var CarPrice = 3000000;
+        // var NumberPlate = 100000;
+        // // var Amount = document.getElementById('New').value;
+        // var Vat = 7.5/100;
+        // var Upfrontper = 5/100;
+        // var myInterest = 3/100;
+        // var RiskPrime = 6/100;
+        // var Paymonth = 12;
+        // var PayDay = document.getElementById('Part').value;
+
+        // var Car  = CarPrice;
+        // var  Number = NumberPlate;
+        var Amount =  CarPrice + NumberPlate + Track;
+        var Valval = Amount * Vat;
+    
+        var Upfront = CarPrice * Upfrontper;
+        var Prema = Amount * RiskPrime;
+        var Down = Valval + Prema + Upfront;
+        var IntVal = Amount * myInterest;
+        var Gain = Amount * myInterest * Paymonth;
+        var All = Gain + Amount;
+        var PayDay = All / Paymonth;
+        var WeekDay = PayDay / 4;
+
+        // toLocaleString() is use to add commer on numbers
+
+        document.getElementById('carName').innerHTML = CarName;
+        document.getElementById('newest').innerHTML = CarPrice.toLocaleString();
+        document.getElementById('nplate').innerHTML = NumberPlate.toLocaleString();
+        document.getElementById('newest').innerHTML = Amount.toLocaleString();
+        document.getElementById('techno').innerHTML = Track.toLocaleString();
+        document.getElementById('vato').innerHTML = Valval.toLocaleString();
+        document.getElementById('front').innerHTML = Upfront.toLocaleString();
+        document.getElementById('prime').innerHTML = Prema.toLocaleString();
+        document.getElementById('damp').innerHTML = Down.toLocaleString();
+        document.getElementById('round').innerHTML = Paymonth;
+        document.getElementById('inte').innerHTML = Gain.toLocaleString();
+        document.getElementById('total').innerHTML =  All.toLocaleString();
+        document.getElementById('repayment').innerHTML = PayDay.toLocaleString();
+        document.getElementById('repaymentday').innerHTML = WeekDay.toLocaleString();
+
+    }
+    </script>
+
+<table width="300" border="1">
+    <thead>
+        <th>Particular</th>
+        <th>Values</th>
+    </thead>
+
+    <tbody>
+        <tr>
+            <td>Amount</td>
+            <td><span id="newest"></span></td>
+
+        </tr>
+
+        <tr>
+            <td>VAT %</td>
+            <td><span id="vato"></span></td>
+        </tr>
+
+        <tr>
+            <td>Plate %</td>
+            <td><span id="nplate"></span></td>
+        </tr>
+
+        <tr>
+            <td>Tracker</td>
+            <td><span id="techno"></span></td>
+        </tr>
+
+        <tr>
+            <td>Risk Premium 1 & 2</td>
+            <td><span id="prime"></span></td>
+        </tr>
+
+        <tr>
+            <td>Upfront</td>
+            <td><span id="front"></span></td>
+        </tr>
+
+        <tr>
+            <td>Down Payment</td>
+            <td><span id="damp"></span></td>
+        </tr>
+
+       
+        <tr>
+            <td>Total Months</td>
+            <td><span id="round"></span></td>
+        </tr>
+
+        <tr>
+            <td>Interest</td>
+            <td><span id="inte"></span></td>
+        </tr>
+
+        <tr>
+            <td>Total Rental</td>
+            <td><span id="total"></span></td>
+        </tr>
+
+        <tr>
+            <td>Monthly Repayment</td>
+            <td><span id="repayment"></span></td>
+        </tr>
+
+        <tr>
+            <td>Weekly Repayment</td>
+            <td><span id="repaymentday"></span></td>
+        </tr>
+
+    </tbody>
+</table>
+
 </html>
