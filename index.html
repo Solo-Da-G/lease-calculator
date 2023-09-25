@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script>
+        function politics(){
+            document.getElementById('politics').innerHTML='Lorem ipsum dolor sit amet consectetur adipisicing elit. In repellendus blanditiis voluptate obcaecati tempora vel porro harum dolorum autem? Velit!,Lorem ipsum dolor sit amet consectetur adipisicing elit. In repellendus blanditiis voluptate obcaecati tempora vel porro harum dolorum autem? Velit!';
+            document.getElementById('politics').style.display='block';
+        }
+
+        function Fashion(){
+            document.getElementById('fashion').innerHTML='Fashion & LifeStyle dolor sit amet consectetur adipisicing elit. In repellendus blanditiis voluptate obcaecati tempora vel porro harum dolorum autem? Velit!,Lorem ipsum dolor sit amet consectetur adipisicing elit. In repellendus blanditiis voluptate obcaecati tempora vel porro harum dolorum autem? Velit!';
+            document.getElementById('fashion').style.display='block';
+        }
+
+        // function salesCalculator(){
+        //     const ProductName = 'Gucci';
+        //     const Price = 20000;
+        //     const Qty = 10;
+
+        //     const Amount = Price * Qty;
+        //     const Disc = Amount * 0.05;
+        //     const VAT = Amount * 0.05;
+        //     const Grosspay = Amount + VAT;
+        //     const Netpay = Grosspay -Disc; 
+
+        //     document.getElementById('ProductName').innerHTML='Product: '+ProductName;
+        //     document.getElementById('Price').innerHTML='Price : &#8358; '+ Price;
+        //     document.getElementById('Qty').innerHTML='Qty: '+ Qty;
+        //     document.getElementById('Amount').innerHTML= 'Amount:  '+Amount;
+        //     document.getElementById('Disc').innerHTML='Disc: '+Disc;
+        //     document.getElementById('VAT').innerHTML='VAT: '+VAT;
+        //     document.getElementById('Grosspay').innerHTML='Grosspay: '+Grosspay;
+        //     document.getElementById('Netpay').innerHTML='Netpay: '+Netpay;
+        // }
+
+    </script>
+
+    <style>
+        button{
+            width: 250px;
+            padding: 10px;
+            background: red;
+            border: none;
+            color: #fff;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .news{
+            background: #f7f7f7;
+            padding: 20px;
+            display: none;
+        }
+
+        .container{
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .col-md-4{
+            background: #000;
+            width: 25%;
+            color: #fff;
+            /* height: 500px; */
+        }
+
+        .col-md-8{
+            width: 75%;
+            background: linear-gradient(rgb(243, 154, 154),rgb(173, 141, 248));
+            height: 200px;
+            
+        }
+        
+    </style>
+</head>
+<body>
+    <h2>Blog</h2>
+    <h1>Trending News</h1>
+    <div class="container">
+        
+        
+        <div class="col-md-4">
+            <h2><button id="news" onclick="return Fashion()">Fashion Today + </button></h2>
+            <h2><button id="news" onclick="return politics()">Politics Today + </button></h2>
+        </div>
+        <div class="col-md-8">
+            <p class="news" id="politics"></p>
+            <p class="news" id="fashion"></p>
+        </div>
+    </div>
+
+    <!-- <p id="ProductName"></p>
+    <p id="Price"></p>
+    <p id="Qty"></p>
+    <p id="Amount"></p>
+    <p id="Disc"></p>
+    <p id="VAT"></p>
+    <p id="Grosspay"></p>
+    <p id="NetPay"></p> -->
+
+
+
+
+   
+    
+</body>
+</html>
