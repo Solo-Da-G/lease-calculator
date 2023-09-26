@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./fontawesom/css/all.css">
     <title>Document</title>
     <style>
         body {
@@ -11,11 +12,26 @@
             width: 100%;
         }
 
-        button {
+        #butt {
             background-color: red;
             color: white;
             font-weight: bold;
         }
+
+        nav {
+            display: none;
+        
+        }
+
+        nav li{
+            list-style: none;
+        }
+
+        nav a{
+            text-decoration: none;
+       
+        }
+
 
         @media screen and (min-width: 480px) {
             body {
@@ -27,6 +43,11 @@
 </head>
 
 <body>
+    <nav id="menus">
+        <li><a href=""><i class="fa-brands fa-whatsapp"></i>08065993208</a></li>
+        <li><a href=""><i class="fa-solid fa-envelope"></i>solyno_04@yahoo.com</a></li>
+    </nav>
+    <button onclick="return info ()"><i class="fa-solid fa-bars"></i></button>
     <h2>CAR LEASE CALCULATOR</h2>
     <form action="" onkeyup="return leaseCalculator()">
         <table>
@@ -107,7 +128,7 @@
 
 
 
-    <button onclick="return leaseCalculator()">Lease Calculator</button>
+    <button onclick="return leaseCalculator()" id="butt">Lease Calculator</button>
 </body>
 
 <script>
@@ -165,6 +186,10 @@
         document.getElementById('repayment').innerHTML = PayDay.toLocaleString();
         document.getElementById('repaymentday').innerHTML = WeekDay.toLocaleString();
 
+    }
+
+    function info(){
+        document.getElementById("menus").style.display= "block";
     }
 </script>
 
