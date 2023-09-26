@@ -10,19 +10,19 @@
             background: lightblue;
             width: 100%;
         }
-        button{
+
+        button {
             background-color: red;
             color: white;
             font-weight: bold;
         }
 
-        @media screen and (min-width: 480px){
+        @media screen and (min-width: 480px) {
             body {
-            background:lightcyan;
-            width: auto;
+                background: lightcyan;
+                width: auto;
+            }
         }
-        }
-
     </style>
 </head>
 
@@ -30,83 +30,84 @@
     <h2>CAR LEASE CALCULATOR</h2>
     <form action="" onkeyup="return leaseCalculator()">
         <table>
-            <tr>
-                <td>
-                    <label for="CarName">Car Name</label>
-                    <input type="text" id="carName" value="" >
-                </td>
-            </tr>
+            <tbody>
+                <tr>
 
-            <tr>
-                <td>
-                    <label for="Carprice">Car Price</label>
-                    <input type="number" id="carPrice" value="">
-                </td>
-            </tr>
+                    <td> <label for="CarName">Car Name</label></td>
+                    <td> <input type="text" id="carName" value=""></td>
 
-            <tr>
-                <td>
-                    <label for="Plate">Number Plate</label>
-                    <input type="number" id="plate" value="">
-                </td>
-            </tr>
+                </tr>
 
+                <tr>
 
-            <tr>
-                <td>
-                    <label for="Tracker">Tracker</label>
-                    <input type="number" id="tech" value="">
-                </td>
-            </tr>
+                    <td> <label for="Carprice">Car Price</label></td>
+                    <td> <input type="number" id="carPrice" value=""></td>
 
-          
-            <tr>
-                <td>
-                    <label for="Vat">VAT</label>
-                    <input type="number" id="vat" value="">
-                </td>
-            </tr>
+                </tr>
 
-            <tr>
-                <td>
-                    <label for="Risk">6% Risk Premium 1 And 2</label>
-                    <input type="number" id="risk">
-                </td>
-            </tr>
+                <tr>
+
+                    <td><label for="Plate">Number Plate</label></td>
+                    <td> <input type="number" id="plate" value=""></td>
+
+                </tr>
 
 
-            <tr>
-                <td>
-                    <label for="Upfront">5% Upfront Payment</label>
-                    <input type="number" id="upfront" >
-                </td>
-            </tr>
+                <tr>
 
-            <tr>
-                <td>
-                    <label for="Tenor">Tenor In Months</label>
-                    <input type="number" id="months" >
-                </td>
-            </tr>
+                    <td> <label for="Tracker">Tracker</label></td>
+                    <td> <input type="number" id="tech" value=""></td>
 
-            
+                </tr>
 
-            <tr>
-                <td>
-                    <label for="Interest">3% Interest Rate</label>
-                    <input type="number" id="interest">
-                </td>
-            </tr>
 
-        
+                <tr>
+
+                    <td> <label for="Vat">VAT(7.5%)</label></td>
+                    <td> <input type="number" id="vat" value=""></td>
+
+                </tr>
+
+                <tr>
+
+                    <td><label for="Risk">6% Risk Premium 1 And 2</label></td>
+                    <td> <input type="number" id="risk"></td>
+
+                </tr>
+
+
+                <tr>
+
+                    <td> <label for="Upfront">5% Upfront Payment</label></td>
+                    <td> <input type="number" id="upfront"></td>
+
+                </tr>
+
+                <tr>
+
+                    <td> <label for="Tenor">Tenor In Months</label></td>
+                    <td> <input type="number" id="months"></td>
+                    </td>
+                </tr>
+
+
+
+                <tr>
+
+                    <td> <label for="Interest">3% Interest Rate</label></td>
+                    <td> <input type="number" id="interest"></td>
+
+                </tr>
+
+            </tbody>
 
         </table>
 
     </form>
 
-    
 
-<button onclick="return leaseCalculator()">Lease Calculator</button>
+
+    <button onclick="return leaseCalculator()">Lease Calculator</button>
 </body>
 
 <script>
@@ -117,10 +118,10 @@
         var Track = Number(document.getElementById('tech').value);
         var Vat = Number(document.getElementById('vat').value);
         var Upfrontper = Number(document.getElementById('upfront').value);
-        var myInterest = document.getElementById('interest').value;
+        var myInterest = Number(document.getElementById('interest').value);
         var RiskPrime = document.getElementById('risk').value;
         var Paymonth = document.getElementById('months').value;
-        
+
 
         // var CarName = 'corola';
         // var CarPrice = 3000000;
@@ -135,14 +136,14 @@
 
         // var Car  = CarPrice;
         // var  Number = NumberPlate;
-        var Amount =  CarPrice + NumberPlate + Track;
-        var Valval = Amount * Vat;
-    
-        var Upfront = CarPrice * Upfrontper;
-        var Prema = Amount * RiskPrime;
+        var Amount = CarPrice + NumberPlate + Track;
+        var Valval = Vat / 100 * Amount;
+
+        var Upfront = Upfrontper / 100 * CarPrice;
+        var Prema = RiskPrime / 100 * Amount;
         var Down = Valval + Prema + Upfront;
-        var IntVal = Amount * myInterest;
-        var Gain = Amount * myInterest * Paymonth;
+        var IntVal = myInterest * Amount;
+        var Gain = myInterest / 100 * Amount * Paymonth;
         var All = Gain + Amount;
         var PayDay = All / Paymonth;
         var WeekDay = PayDay / 4;
@@ -160,12 +161,12 @@
         document.getElementById('damp').innerHTML = Down.toLocaleString();
         document.getElementById('round').innerHTML = Paymonth;
         document.getElementById('inte').innerHTML = Gain.toLocaleString();
-        document.getElementById('total').innerHTML =  All.toLocaleString();
+        document.getElementById('total').innerHTML = All.toLocaleString();
         document.getElementById('repayment').innerHTML = PayDay.toLocaleString();
         document.getElementById('repaymentday').innerHTML = WeekDay.toLocaleString();
 
     }
-    </script>
+</script>
 
 <table width="300" border="1">
     <thead>
@@ -210,7 +211,7 @@
             <td><span id="damp"></span></td>
         </tr>
 
-       
+
         <tr>
             <td>Total Months</td>
             <td><span id="round"></span></td>
