@@ -54,14 +54,14 @@
             <tbody>
                 <tr>
 
-                    <td> <label for="CarName">Car Name</label></td>
+                    <td> <label for="CarName">Asset Type</label></td>
                     <td> <input type="text" id="carName" value=""></td>
 
                 </tr>
 
                 <tr>
 
-                    <td> <label for="Carprice">Car Price</label></td>
+                    <td> <label for="Carprice">Cost of Asset</label></td>
                     <td> <input type="number" id="carPrice" value=""></td>
 
                 </tr>
@@ -86,6 +86,13 @@
 
                     <td><label for="Risk">6% Risk Premium 1 And 2</label></td>
                     <td> <input type="number" id="risk"></td>
+
+                </tr>
+
+                <tr>
+
+                    <td><label for="Admin">Admin Fee(1.5%)</label></td>
+                    <td> <input type="number" id="surplus"></td>
 
                 </tr>
 
@@ -144,6 +151,7 @@
         var Vat = Number(document.getElementById('vat').value);
         var RiskPrime = document.getElementById('risk').value;
         var Paymonth = document.getElementById('months').value;
+        var Admon = Number(document.getElementById('surplus').value);
 
 
         // var CarName = 'corola';
@@ -165,10 +173,11 @@
         var IntVal = myInterest * Amount;
         var Gain = myInterest / 100 * Amount * Paymonth;
         var Valval = Vat / 100 * Gain;
-        var Down = Upfront + Prema + Valval;
         var All = Gain + Amount;
         var PayDay = All / Paymonth;
         var WeekDay = PayDay / 4;
+        var Admin = Admon / 100 * Amount;
+        var Down = Upfront + Prema + Valval + Admin;
 
         // toLocaleString() is use to add commer on numbers
 
@@ -186,6 +195,7 @@
         document.getElementById('total').innerHTML = All.toLocaleString();
         document.getElementById('repayment').innerHTML = PayDay.toLocaleString();
         document.getElementById('repaymentday').innerHTML = WeekDay.toLocaleString();
+        document.getElementById('extraplus').innerHTML = Admin.toLocaleString();
 
     }
 
@@ -225,6 +235,11 @@
         <tr>
             <td>Risk Premium 1 & 2</td>
             <td><span id="prime"></span></td>
+        </tr>
+
+        <tr>
+            <td>Admin Fee</td>
+            <td><span id="extraplus"></span></td>
         </tr>
 
         <tr>
