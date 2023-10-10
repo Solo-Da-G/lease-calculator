@@ -181,6 +181,7 @@
         var WeekDay = PayDay / 4;
         var Admin = Admon / 100 * Amount;
         var Down = Upfront + Prema + Valval + Admin;
+        var Monthcos = myInterest / 100 * Amount;
 
         // toLocaleString() is use to add commer on numbers
 
@@ -199,6 +200,7 @@
         document.getElementById('repayment').innerHTML = PayDay.toLocaleString();
         document.getElementById('repaymentday').innerHTML = WeekDay.toLocaleString();
         document.getElementById('extraplus').innerHTML = Admin.toLocaleString();
+        document.getElementById('cosmonthus').innerHTML = Monthcos.toLocaleString();
 
     }
 
@@ -251,7 +253,7 @@
         </tr>
 
         <tr>
-            <td>Down Payment</td>
+            <td>Total Initial Payment</td>
             <td><span id="damp"></span></td>
         </tr>
 
@@ -262,7 +264,12 @@
         </tr>
 
         <tr>
-            <td>Interest</td>
+            <td>Monthly COS</td>
+            <td><span id="cosmonthus"></span></td>
+        </tr>
+
+        <tr>
+            <td>Total COS</td>
             <td><span id="inte"></span></td>
         </tr>
 
@@ -272,12 +279,12 @@
         </tr>
 
         <tr>
-            <td>Monthly Repayment</td>
+            <td>Monthly Rental</td>
             <td><span id="repayment"></span></td>
         </tr>
 
         <tr>
-            <td>Weekly Repayment</td>
+            <td>Weekly Rental</td>
             <td><span id="repaymentday"></span></td>
         </tr>
 
