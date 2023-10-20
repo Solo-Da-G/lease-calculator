@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://kit.fontawesome.com/c1db006cdf.js" crossorigin="anonymous"></script>
     <title>Solomon Lease Calulator</title>
+    
     <style>
         body {
             background: lightblue;
@@ -144,79 +145,18 @@
 
             </tbody>
 
+            
+    <button onclick="return leaseCalculator()" id="butt">Lease Calculator</button>
         </table>
 
     </form>
 
 
 
-    <button onclick="return leaseCalculator()" id="butt">Lease Calculator</button>
 </body>
 
 <script>
-    function leaseCalculator() {
-        var CarName = document.getElementById('carName').value;
-        var CarPrice = Number(document.getElementById('carPrice').value);
-        var NumberPlate = Number(document.getElementById('plate').value);
-        var Track = Number(document.getElementById('tech').value);
-        var Upfrontper = Number(document.getElementById('upfront').value);
-        var myInterest = Number(document.getElementById('interest').value);
-        var Vat = Number(document.getElementById('vat').value);
-        var RiskPrime = document.getElementById('risk').value;
-        var Paymonth = document.getElementById('months').value;
-        var Admon = Number(document.getElementById('surplus').value);
-
-
-        // var CarName = 'corola';
-        // var CarPrice = 3000000;
-        // var NumberPlate = 100000;
-        // // var Amount = document.getElementById('New').value;
-        // var Vat = 7.5/100;
-        // var Upfrontper = 5/100;
-        // var myInterest = 3/100;
-        // var RiskPrime = 6/100;
-        // var Paymonth = 12;
-        // var PayDay = document.getElementById('Part').value;
-
-        // var Car  = CarPrice;
-        // var  Number = NumberPlate;
-        var Amount = CarPrice + NumberPlate + Track;
-        var Upfront = Upfrontper / 100 * CarPrice;
-        var Prema = RiskPrime / 100 * Amount;
-        var IntVal = myInterest * Amount;
-        var Gain = myInterest / 100 * Amount * Paymonth;
-        var Valval = Vat / 100 * Gain;
-        var All = Gain + Amount;
-        var PayDay = All / Paymonth;
-        var WeekDay = PayDay / 4;
-        var Admin = Admon / 100 * Amount;
-        var Down = Upfront + Prema + Valval + Admin;
-        var Monthcos = myInterest / 100 * Amount;
-
-        // toLocaleString() is use to add commer on numbers
-
-        document.getElementById('carName').innerHTML = CarName;
-        document.getElementById('newest').innerHTML = CarPrice.toLocaleString();
-        document.getElementById('nplate').innerHTML = NumberPlate.toLocaleString();
-        document.getElementById('newest').innerHTML = Amount.toLocaleString();
-        document.getElementById('techno').innerHTML = Track.toLocaleString();
-        document.getElementById('vato').innerHTML = Valval.toLocaleString();
-        document.getElementById('front').innerHTML = Upfront.toLocaleString();
-        document.getElementById('prime').innerHTML = Prema.toLocaleString();
-        document.getElementById('damp').innerHTML = Down.toLocaleString();
-        document.getElementById('round').innerHTML = Paymonth;
-        document.getElementById('inte').innerHTML = Gain.toLocaleString();
-        document.getElementById('total').innerHTML = All.toLocaleString();
-        document.getElementById('repayment').innerHTML = PayDay.toLocaleString();
-        document.getElementById('repaymentday').innerHTML = WeekDay.toLocaleString();
-        document.getElementById('extraplus').innerHTML = Admin.toLocaleString();
-        document.getElementById('cosmonthus').innerHTML = Monthcos.toLocaleString();
-
-    }
-
-    function info(){
-        document.getElementById("menus").style.display= "block";
-    }
+   
 </script>
 
 <table width="300" border="1">
@@ -302,3 +242,4 @@
 </table>
 
 </html>
+<script src="./cal.js"></script>
