@@ -1,288 +1,202 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lease Comparison Tool</title>
     <script src="https://kit.fontawesome.com/c1db006cdf.js" crossorigin="anonymous"></script>
-    <title>Solomon Lease Calulator</title>
-    <script src="solomonboostcal.js"></script>
     <style>
+        :root {
+            --primary: #2563eb;
+            --success: #059669;
+            --bg: #f1f5f9;
+            --card: #ffffff;
+            --text: #1e293b;
+        }
+
         body {
-            background: lightblue;
-            width: 100%;
+            font-family: 'Inter', system-ui, sans-serif;
+            background-color: var(--bg);
+            margin: 0;
+            padding: 20px;
         }
 
-        #butt {
-            background-color: red;
-            color: white;
-            font-weight: bold;
+        .wrapper {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            max-width: 1100px;
+            margin: 0 auto;
         }
 
-        nav {
-            display: none;
+        .calc-container {
+            background: var(--card);
+            flex: 1;
+            min-width: 350px;
+            max-width: 500px;
+            padding: 1.5rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .secondary-theme h2 { color: var(--success); }
+
+        h2 { 
+            text-align: center; 
+            color: var(--primary); 
+            font-size: 1.25rem;
+            margin-bottom: 1.5rem; 
+        }
+
+        .input-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .input-group { margin-bottom: 0.8rem; }
+        .full-width { grid-column: span 2; }
+
+        label { 
+            display: block; 
+            font-size: 10px; 
+            font-weight: 700; 
+            margin-bottom: 4px; 
+            text-transform: uppercase; 
+            color: #64748b; 
+        }
         
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 0.9rem;
         }
 
-        nav li{
-            list-style: none;
+        .results-card {
+            background: #f8fafc;
+            padding: 1.2rem;
+            border-radius: 10px;
+            margin-top: 1.5rem;
+            border: 1px dashed #cbd5e1;
+            min-height: 120px;
         }
 
-        nav a{
-            text-decoration: none;
-       
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            font-size: 0.9rem;
         }
 
-        #damp{
-            color: blue;
-            font-weight: bolder;
+        .result-value { font-weight: 600; color: var(--text); }
+        
+        .market-apr {
+            background: #fffbeb;
+            border: 1px solid #fde68a;
+            color: #92400e;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            margin-top: 12px;
+            text-align: center;
+            display: none; /* Hidden until calculated */
         }
 
-        .damp1{
-            color: blue;
-            font-weight: bolder;
+        .highlight { 
+            color: var(--primary); 
+            font-size: 1.1rem; 
+            border-top: 2px solid #e2e8f0; 
+            margin-top: 8px; 
+            padding-top: 10px; 
+            font-weight: 800;
         }
 
-        #vato{
-            font-weight: 900;
+        .button-group {
+            margin-top: 1.5rem;
+            display: flex;
+            gap: 10px;
         }
 
-        .vato1{ 
-           font-weight:900;   
+        button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background: #334155;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 11px;
         }
 
-        #prime{font-weight:900;}
-
-        .prime1{font-weight:900;}
-
-#extraplus{font-weight:900;}
-.extraplus1{font-weight:900;}
-
-#front{font-weight:900;}
-.front1{font-weight:900;}
-
-
-
-
-
-
-
-
-/* <<<<<>>>>>>>> */
-
-        @media screen and (min-width: 480px) {
-            body {
-                background:lightblue;
-                width: auto;
-            }
-        }
+        .footer-link { text-align: center; margin-top: 1rem; font-size: 0.75rem; }
+        .footer-link a { color: var(--primary); text-decoration: none; }
     </style>
 </head>
-
 <body>
-    <nav id="menus">
-        <li><a href=""><i class="fa-brands fa-whatsapp"></i>08065993208</a></li>
-        <li><a href=""><i class="fa-solid fa-envelope"></i>solyno_04@yahoo.com</a></li>
-    </nav>
-    <button onclick="return info ()"><i class="fa-solid fa-bars"></i></button>
-    <div class="logo">
-        <img src="./miss-logo.png" alt="" width="100px">
+
+<div class="wrapper">
+    <div class="calc-container">
+        <div class="img"><img src="./miss-logo.png" alt="" width="60px"></div>
+        <h2><i class="fa-solid fa-calculator"></i> Flat Rate Plan</h2>
+        <div class="input-grid">
+            <div class="input-group full-width"><label>Asset Type</label><input type="text" id="f_carName" placeholder="Enter Asset Name"></div>
+            <div class="input-group"><label>Cost of Asset</label><input type="number" id="f_price" placeholder="0.00"></div>
+            <div class="input-group"><label>Number Plate</label><input type="number" id="f_plate" placeholder="0.00"></div>
+            <div class="input-group"><label>HMO</label><input type="number" id="f_heal" placeholder="0.00"></div>
+            <div class="input-group"><label>Tracker</label><input type="number" id="f_tech" placeholder="0.00"></div>
+            <div class="input-group"><label>Tenor (Months)</label><input type="number" id="f_months" placeholder="0"></div>
+            <div class="input-group"><label>Flat Int. Rate (%)</label><input type="number" id="f_interest" placeholder="0%"></div>
+        </div>
+
+        <div class="results-card">
+            <div class="result-item"><span>Total Interest</span><span class="result-value" id="f_resInterest">-</span></div>
+            <div class="result-item"><span>Total Rental</span><span class="result-value" id="f_resTotal">-</span></div>
+            <div class="result-item highlight"><span>Monthly Rental</span><span class="result-value" id="f_resMonthly">-</span></div>
+            <div class="market-apr" id="apr_box">
+                Effective TVM Market Rate (APR):<br>
+                <strong id="f_resAPR">0.00%</strong>
+            </div>
+        </div>
+        <div class="footer-link"><a href="https://missleasing.com/" target="_blank">missleasing.com</a></div>
     </div>
-    <h2>ASSET LEASE CALCULATOR.</h2>
-    <form action="" onkeyup="return leaseCalculator()">
-        <table>
-            <tbody>
-                <tr>
 
-                    <td> <label for="CarName">Asset Type</label></td>
-                    <td> <input type="text" id="carName" value=""></td>
-
-                </tr>
-
-                <tr>
-
-                    <td> <label for="Carprice">Cost of Asset</label></td>
-                    <td> <input type="number" id="carPrice" value=""></td>
-
-                </tr>
-
-                <tr>
-
-                    <td><label for="Plate">Number Plate</label></td>
-                    <td> <input type="number" id="plate" value=""></td>
-
-                </tr>
-
-
-                <tr>
-
-                    <td><label for="heal">HMO</label></td>
-                    <td> <input type="number" id="heal" value=""></td>
-
-                </tr>
-
-                <tr>
-
-                    <td> <label for="Tracker">Tracker</label></td>
-                    <td> <input type="number" id="tech" value=""></td>
-
-                </tr>
-
-
-                <tr>
-
-                    <td><label for="Risk">6% Risk Premium 1 And 2</label></td>
-                    <td> <input type="number" id="risk"></td>
-
-                </tr>
-
-                <tr>
-
-                    <td><label for="Admin">Admin Fee(1.5%)</label></td>
-                    <td> <input type="number" id="surplus"></td>
-
-                </tr>
-
-
-                <tr>
-
-                    <td> <label for="Upfront">5% Upfront Payment</label></td>
-                    <td> <input type="number" id="upfront"></td>
-
-                </tr>
-
-                <tr>
-
-                    <td> <label for="Tenor">Tenor In Months</label></td>
-                    <td> <input type="number" id="months"></td>
-                    </td>
-                </tr>
-
-
-
-                <tr>
-
-                    <td> <label for="Interest">3% Interest Rate</label></td>
-                    <td> <input type="number" id="interest"></td>
-
-                </tr>
-
-                
-                <tr>
-
-                    <td> <label for="Vat">VAT(7.5%)</label></td>
-                    <td> <input type="number" id="vat" value=""></td>
-
-                </tr>
-
-
-            </tbody>
-
+    <div class="calc-container secondary-theme">
+        <h2><i class="fa-solid fa-chart-line"></i> Reducing Balance (TVM)</h2>
+        <div class="input-grid">
+            <div class="input-group"><label>Cost of Asset</label><input type="number" id="r_price" placeholder="0.00"></div>
+            <div class="input-group"><label>Plate/HMO/Track</label><input type="number" id="r_extras" placeholder="0.00"></div>
+            <div class="input-group"><label>Insurance (%)</label><input type="number" id="r_ins_per" placeholder="0%"></div>
+            <div class="input-group"><label>Admin (%)</label><input type="number" id="r_adm_per" placeholder="0%"></div>
+            <div class="input-group"><label>Tenor (Months)</label><input type="number" id="r_months" placeholder="0"></div>
+            <div class="input-group"><label>Annual Rate (%)</label><input type="number" id="r_interest" placeholder="0%"></div>
+            <div class="input-group"><label>VAT (%)</label><input type="number" id="r_vat_per" placeholder="0%"></div>
+            <div class="input-group"><label>Adv. Rental (Qty)</label><input type="number" id="r_advance" placeholder="0"></div>
+        </div>
         
-        </table>
-        <button onclick="return leaseCalculator()" id="butt">Lease Calculator</button>
+        <div class="results-card">
+            <div class="result-item"><span>Initial Payment</span><span id="r_resInitial" class="result-value">-</span></div>
+            <div class="result-item"><span>Total Interest</span><span id="r_resInterest" class="result-value">-</span></div>
+            <div class="result-item highlight"><span>Monthly Rental</span><span id="r_resMonthly" class="result-value">-</span></div>
+        </div>
 
-    </form>
+        <div class="button-group">
+            <button onclick="generateSchedule('monthly')">Monthly Schedule</button>
+            <button onclick="generateSchedule('weekly')">Weekly Schedule</button>
+        </div>
+    </div>
+</div>
 
-
-
+<script src="script.js"></script>
 </body>
-
-<script>
-   
-</script>
-
-<table width="300" border="1">
-    <thead>
-        <th>Particular</th>
-        <th>Values</th>
-    </thead>
-
-    <tbody>
-        <tr>
-            <td>Amount</td>
-            <td><span id="newest"></span></td>
-
-        </tr>
-
-
-        <tr>
-            <td>Plate </td>
-            <td><span id="nplate"></span></td>
-        </tr>
-
-        <tr>
-            <td>Tracker</td>
-            <td><span id="techno"></span></td>
-        </tr>
-
-        <tr>
-            <td>HMO</td>
-            <td><span id="healer"></span></td>
-        </tr>
-
-
-        <tr>
-            <td class="vato1">VAT </td>
-            <td><span id="vato"></span></td>
-        </tr>
-
-        <tr>
-            <td class="prime1">Risk Premium 1 & 2</td>
-            <td><span id="prime"></span></td>
-        </tr>
-
-        <tr>
-            <td class="extraplus1">Admin Fee</td>
-            <td><span id="extraplus"></span></td>
-        </tr>
-
-        <tr>
-            <td class="front1">Upfront</td>
-            <td><span id="front"></span></td>
-        </tr>
-
-        <tr>
-            <td class="damp1">Total Initial Payment</td>
-            <td><span id="damp"></span></td>
-        </tr>
-
-
-        <tr>
-            <td>Total Months</td>
-            <td><span id="round"></span></td>
-        </tr>
-
-        <tr>
-            <td>Monthly COS</td>
-            <td><span id="cosmonthus"></span></td>
-        </tr>
-
-        <tr>
-            <td>Total COS</td>
-            <td><span id="inte"></span></td>
-        </tr>
-
-        <tr>
-            <td>Total Rental</td>
-            <td><span id="total"></span></td>
-        </tr>
-
-        <tr>
-            <td>Monthly Rental</td>
-            <td><span id="repayment"></span></td>
-        </tr>
-
-        <tr>
-            <td>Weekly Rental</td>
-            <td><span id="repaymentday"></span></td>
-        </tr>
-
-    </tbody>
-</table>
-<!-- direct to miss website -->
-<h6><a href="https://missleasing.com/">For More</a></h6>
 </html>
+
+
+
 <script src="solomoncalfunction/killercode233290hjsdjaiwo.js"></script>
-<script src="maincal.js"></script>
-<script src="boostcal.js"></script>
+
+

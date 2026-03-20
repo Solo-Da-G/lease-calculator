@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Lease Repayment Schedule</title>
+<style>
+    body { font-family: Arial, sans-serif; background: #f1f5f9; padding: 20px; }
+    .container { max-width: 1100px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+    h2 { text-align: center; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; table-layout: auto; }
+    th, td { border: 1px solid #ddd; padding: 6px 4px; text-align: right; font-size: 13px; }
+    th { background: #2563eb; color: white; }
+    td:first-child, th:first-child { text-align: center; }
+    .button-group { margin-top: 20px; display: flex; gap: 10px; justify-content: center; }
+    button { padding: 10px 20px; border: none; color: white; cursor: pointer; border-radius: 5px; font-weight: bold; }
+    .btn-whatsapp { background: #25D366; }
+    .btn-print { background: #059669; }
+    @media print {
+        .button-group { display: none; }
+        th { background-color: #2563eb !important; -webkit-print-color-adjust: exact; }
+    }
+</style>
+</head>
+<body>
+
+<div class="container">
+    <div class="img"><img src="./miss-logo.png" alt="" width="60px"></div>
+    <h2>Lease Repayment Schedule</h2>
+    <p id="summaryText" style="text-align: center; font-weight: bold;"></p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Period</th>
+                <th>Balance B/F</th>
+                <th>Principal</th>
+                <th>Interest</th>
+                <th>VAT</th>
+                <th>Total Payment</th>
+                <th>Balance C/F</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+    </table>
+
+    <div class="button-group">
+        <button class="btn-print" onclick="window.print()">Print / Save as PDF</button>
+        <button class="btn-whatsapp" onclick="shareWhatsApp()">Share via WhatsApp</button>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const rawData = sessionStorage.getItem('leaseData');
+    if (!rawData) {
+        alert("No data found.");
+        window.location.href = 'index.html';
+        return;
+    }
+
+    const data = JSON.parse(rawData);
+    const assetCost = data.price + data.extras;
+    const monthlyRate = (data.annualRate / 100) / 12;
+    const months = data.months;
+    const advanceQty = data.advanceQty || 0;
+    const isWeekly = data.type === 'weekly';
+
+    // 1. Calculate Discounted Monthly Payment (Annuity Due logic)
+    const factor = ((1 - Math.pow(1 + monthlyRate, -(months - advanceQty))) / monthlyRate) + advanceQty;
+    const pmt = assetCost / factor;
+    
+    // 2. VAT spread across total term
+    const totalInterest = (pmt * months) - assetCost;
+    const totalVat = (data.vatPer / 100) * totalInterest;
+    
+    // 3. Define Divisors (Weekly vs Monthly)
+    const div = isWeekly ? 4 : 1;
+    const totalPeriods = (months - advanceQty) * div;
+    const periodPmt = pmt / div;
+    const periodVat = (totalVat / months) / div;
+    const periodRate = monthlyRate / div;
+
+    const tbody = document.getElementById('tableBody');
+    let runningBalance = assetCost;
+
+    // --- Period 0: Advance Payments (Time 0 - No Interest) ---
+    if (advanceQty > 0) {
+        const advTotal = pmt * advanceQty;
+        const row = `<tr>
+            <td>0 (Adv)</td>
+            <td>${assetCost.toLocaleString(undefined,{minimumFractionDigits:2})}</td>
+            <td>${advTotal.toLocaleString(undefined,{minimumFractionDigits:2})}</td>
+            <td>0.00</td>
+            <td>0.00</td>
+            <td style="font-weight:bold">${advTotal.toLocaleString(undefined,{minimumFractionDigits:2})}</td>
+            <td>${(assetCost - advTotal).toLocaleString(undefined,{minimumFractionDigits:2})}</td>
+        </tr>`;
+        tbody.innerHTML += row;
+        runningBalance -= advTotal;
+    }
+
+    // --- Amortization Loop ---
+    for (let i = 1; i <= totalPeriods; i++) {
+        let interest = runningBalance * periodRate;
+        let principal = periodPmt - interest;
+        let totalWithVat = periodPmt + periodVat;
+        let closing = runningBalance - principal;
+        
+        if (i === totalPeriods) closing = 0;
+
+        const row = `<tr>
+            <td>${i}</td>
+            <td>${runningBalance.toLocaleString(undefined,{minimumFractionDigits:2})}</td>
+            <td>${principal.toLocaleString(undefined,{minimumFractionDigits:2})}</td>
+            <td>${interest.toLocaleString(undefined,{minimumFractionDigits:2})}</td>
+            <td>${periodVat.toLocaleString(undefined,{minimumFractionDigits:2})}</td>
+            <td style="font-weight:bold">${totalWithVat.toLocaleString(undefined,{minimumFractionDigits:2})}</td>
+            <td>${Math.max(0, closing).toLocaleString(undefined,{minimumFractionDigits:2})}</td>
+        </tr>`;
+
+        tbody.innerHTML += row;
+        runningBalance = closing;
+    }
+
+    document.getElementById('summaryText').innerText = 
+        `${data.type.toUpperCase()} | Asset Cost: ${assetCost.toLocaleString()} | Annual Rate: ${data.annualRate}%`;
+});
+
+function shareWhatsApp() {
+    const text = "Hi, check out this Lease Repayment Schedule I generated.";
+    window.open(`https://wa.me/?text=${encodeURIComponent(text + " " + window.location.href)}`, '_blank');
+}
+</script>
+</body>
+</html>
