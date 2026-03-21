@@ -46,6 +46,11 @@
     --transition-slow: 0.5s cubic-bezier(.4,0,.2,1);
 }
 
+/* ---------- Global Reset ---------- */
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
 /* ---------- Animated Background ---------- */
 body {
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
@@ -54,7 +59,6 @@ body {
     margin: 0;
     padding: 2rem 1rem;
     min-height: 100vh;
-    box-sizing: border-box;
     overflow-x: hidden;
     position: relative;
 }
@@ -673,16 +677,7 @@ td {
     input { padding: 0.65rem 0.75rem; font-size: 0.85rem; }
     label { font-size: 0.65rem; margin-bottom: 0.3rem; }
 
-    .input-grid {
-        grid-template-columns: 1fr;
-    }
-    .full-width {
-        grid-column: span 1;
-    }
-
-    .button-group {
-        grid-template-columns: 1fr;
-    }
+    /* Removed single column overrides so inputs stay side-by-side and shorter */
 
     .theme-toggle {
         top: 0.8rem;
