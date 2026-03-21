@@ -149,6 +149,8 @@ function generateSchedule(type) {
         months: Number(document.getElementById('r_months').value) || 0,
         annualRate: Number(document.getElementById('r_interest').value) || 0,
         vatPer: Number(document.getElementById('r_vat_per').value) || 0,
+        insPer: Number(document.getElementById('r_ins_per').value) || 0,
+        admPer: Number(document.getElementById('r_adm_per').value) || 0,
         advanceQty: Number(document.getElementById('r_advance').value) || 0,
         type: type
     };

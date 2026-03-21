@@ -223,21 +223,30 @@ function shareWhatsApp() {
     const advTotal = pmt * advanceQty;
     const totalRepayment = advTotal + (standardPayment * periods);
 
+    const insAmt = ((data.insPer || 0) / 100) * assetCost;
+    const admAmt = ((data.admPer || 0) / 100) * assetCost;
+    const initialFeesAmount = insAmt + admAmt;
+    const totalInitialPayment = initialFeesAmount + advTotal;
+
     let text = `*📊 Lease Repayment Schedule*\n\n`;
     text += `*Asset Cost:* ${fNum(assetCost)}\n`;
     text += `*Tenor:* ${months} Months\n`;
     text += `*Annual Rate:* ${data.annualRate}%\n`;
     text += `*Payment Mode:* ${modeName}\n\n`;
     
-    if (advanceQty > 0) {
-        text += `*Advance Payment:* ${fNum(advTotal)} (${advanceQty} ${isWeekly ? 'Weeks' : 'Months'})\n`;
+    text += `*Total Initial Payment:* ${fNum(totalInitialPayment)}\n`;
+    if (advanceQty > 0 || initialFeesAmount > 0) {
+        text += `_Breakdown:_\n`;
+        if (advanceQty > 0) text += `- Advance Rental: ${fNum(advTotal)}\n`;
+        if (insAmt > 0) text += `- Insurance: ${fNum(insAmt)}\n`;
+        if (admAmt > 0) text += `- Admin Fee: ${fNum(admAmt)}\n`;
     }
+    text += `\n`;
     
     text += `*${modeName} Payment:* ${fNum(standardPayment)} (inclusive of VAT)\n\n`;
     
     text += `*Total Principal:* ${fNum(assetCost)}\n`;
     text += `*Total Interest:* ${fNum(totalInterest)}\n`;
-    text += `*Total VAT:* ${fNum(totalVat)}\n`;
     text += `*Total Repayment:* ${fNum(totalRepayment)}\n\n`;
     
     text += `_Powered by Miss Leasing_`;
