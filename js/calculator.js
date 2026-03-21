@@ -1,3 +1,9 @@
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW registration failed:', err));
+    });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     const toggleBtn = document.getElementById('themeToggle');
     if (toggleBtn) {

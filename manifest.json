@@ -1,0 +1,17 @@
+{
+  "name": "Lease Comparison Tool",
+  "short_name": "Lease Calc",
+  "description": "Compare Flat Rate and Reducing Balance lease plans, calculate monthly rentals, and generate repayment schedules.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0b0f1a",
+  "theme_color": "#0b0f1a",
+  "icons": [
+    {
+      "src": "./miss-logo.png",
+      "sizes": "192x192 512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
