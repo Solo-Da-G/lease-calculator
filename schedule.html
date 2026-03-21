@@ -186,8 +186,63 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function shareWhatsApp() {
-    const text = "Hi, check out this Lease Repayment Schedule I generated.";
-    window.open(`https://wa.me/?text=${encodeURIComponent(text + " " + window.location.href)}`, '_blank');
+    const rawData = sessionStorage.getItem('leaseData');
+    if (!rawData) {
+        alert("No data available to share.");
+        return;
+    }
+    const data = JSON.parse(rawData);
+    
+    const assetCost = data.price + data.extras;
+    const monthlyRate = (data.annualRate / 100) / 12;
+    const months = data.months;
+    const advanceQty = data.advanceQty || 0;
+    const isWeekly = data.type === 'weekly';
+    const div = isWeekly ? 4 : 1;
+    
+    let pmt = 0;
+    if (monthlyRate > 0) {
+        const factor = ((1 - Math.pow(1 + monthlyRate, -(months - advanceQty))) / monthlyRate) + advanceQty;
+        pmt = assetCost / factor;
+    } else {
+        pmt = assetCost / months;
+    }
+    
+    let totalInterest = (pmt * months) - assetCost;
+    if (totalInterest < 0) totalInterest = 0;
+    const totalVat = (data.vatPer / 100) * totalInterest;
+    
+    const fNum = val => val.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    
+    const modeName = isWeekly ? 'Weekly' : 'Monthly';
+    
+    const periodPmt = pmt / div;
+    const periodVat = (totalVat / months) / div;
+    const standardPayment = periodPmt + periodVat;
+    const periods = (months - advanceQty) * div;
+    const advTotal = pmt * advanceQty;
+    const totalRepayment = advTotal + (standardPayment * periods);
+
+    let text = `*📊 Lease Repayment Schedule*\n\n`;
+    text += `*Asset Cost:* ${fNum(assetCost)}\n`;
+    text += `*Tenor:* ${months} Months\n`;
+    text += `*Annual Rate:* ${data.annualRate}%\n`;
+    text += `*Payment Mode:* ${modeName}\n\n`;
+    
+    if (advanceQty > 0) {
+        text += `*Advance Payment:* ${fNum(advTotal)} (${advanceQty} ${isWeekly ? 'Weeks' : 'Months'})\n`;
+    }
+    
+    text += `*${modeName} Payment:* ${fNum(standardPayment)} (inclusive of VAT)\n\n`;
+    
+    text += `*Total Principal:* ${fNum(assetCost)}\n`;
+    text += `*Total Interest:* ${fNum(totalInterest)}\n`;
+    text += `*Total VAT:* ${fNum(totalVat)}\n`;
+    text += `*Total Repayment:* ${fNum(totalRepayment)}\n\n`;
+    
+    text += `_Powered by Miss Leasing_`;
+    
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
 }
 </script>
 </body>
