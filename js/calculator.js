@@ -20,7 +20,63 @@ document.addEventListener('DOMContentLoaded', () => {
             calculateReducing();
         });
     });
+
+    // Live comma formatting for monetary inputs
+    document.querySelectorAll('.comma-input').forEach(input => {
+        input.addEventListener('input', function () {
+            formatCommaInput(this);
+        });
+    });
 });
+
+// Strip commas and return a number
+function getNum(id) {
+    const el = document.getElementById(id);
+    if (!el) return 0;
+    return Number(el.value.replace(/,/g, '')) || 0;
+}
+
+// Format an input's value with commas, preserving cursor position
+function formatCommaInput(el) {
+    const raw = el.value.replace(/,/g, '');
+    // Allow empty, trailing dot, or partial decimal entry
+    if (raw === '' || raw === '.' || /\.\d*$/.test(raw) && raw.endsWith('0') === false) {
+        // For decimals, format the integer part only
+        if (raw.includes('.')) {
+            const parts = raw.split('.');
+            const intPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+            const cursorPos = el.selectionStart;
+            el.value = intPart + '.' + parts[1];
+            el.setSelectionRange(cursorPos, cursorPos);
+        }
+        return;
+    }
+    const num = parseFloat(raw);
+    if (isNaN(num)) return;
+    const cursorPos = el.selectionStart;
+    const oldLen = el.value.length;
+    if (raw.includes('.')) {
+        const parts = raw.split('.');
+        const intPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        el.value = intPart + '.' + parts[1];
+    } else {
+        el.value = num.toLocaleString('en-US', { maximumFractionDigits: 0 });
+    }
+    const newLen = el.value.length;
+    const newCursor = cursorPos + (newLen - oldLen);
+    el.setSelectionRange(newCursor, newCursor);
+}
+
+// Helper to set a comma-input field's value with formatting
+function setCommaValue(id, val) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (val === 0 || val === '') {
+        el.value = '';
+        return;
+    }
+    el.value = Number(val).toLocaleString('en-US', { maximumFractionDigits: 2 });
+}
 
 function updateUI(id, val, isPercent = false) {
     const el = document.getElementById(id);
@@ -42,10 +98,10 @@ function updateUI(id, val, isPercent = false) {
 }
 
 function calculateFlat() {
-    const price = Number(document.getElementById('f_price').value) || 0;
-    const plate = Number(document.getElementById('f_plate').value) || 0;
-    const hmo = Number(document.getElementById('f_heal').value) || 0;
-    const tech = Number(document.getElementById('f_tech').value) || 0;
+    const price = getNum('f_price');
+    const plate = getNum('f_plate');
+    const hmo = getNum('f_heal');
+    const tech = getNum('f_tech');
     const months = Number(document.getElementById('f_months').value) || 0;
     const flatRate = Number(document.getElementById('f_interest').value) || 0;
 
@@ -60,8 +116,8 @@ function calculateFlat() {
         updateUI('f_resMonthly', monthlyRental);
 
         const extrasTotal = plate + hmo + tech;
-        document.getElementById('r_price').value = price === 0 ? "" : price;
-        document.getElementById('r_extras').value = extrasTotal === 0 ? "" : extrasTotal;
+        setCommaValue('r_price', price === 0 ? '' : price);
+        setCommaValue('r_extras', extrasTotal === 0 ? '' : extrasTotal);
         document.getElementById('r_months').value = months === 0 ? "" : months;
 
         // Ensure monthlyRental is strictly greater than principal / months to solve for rate
@@ -105,8 +161,8 @@ function solveForRate(pv, pmt, n) {
 }
 
 function calculateReducing() {
-    const price = Number(document.getElementById('r_price').value) || 0;
-    const extras = Number(document.getElementById('r_extras').value) || 0;
+    const price = getNum('r_price');
+    const extras = getNum('r_extras');
     const insPer = Number(document.getElementById('r_ins_per').value) || 0;
     const admPer = Number(document.getElementById('r_adm_per').value) || 0;
     const months = Number(document.getElementById('r_months').value) || 0;
@@ -150,8 +206,8 @@ function calculateReducing() {
 
 function generateSchedule(type) {
     const data = {
-        price: Number(document.getElementById('r_price').value) || 0,
-        extras: Number(document.getElementById('r_extras').value) || 0,
+        price: getNum('r_price'),
+        extras: getNum('r_extras'),
         months: Number(document.getElementById('r_months').value) || 0,
         annualRate: Number(document.getElementById('r_interest').value) || 0,
         vatPer: Number(document.getElementById('r_vat_per').value) || 0,
