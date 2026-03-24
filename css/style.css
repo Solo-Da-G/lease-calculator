@@ -421,29 +421,6 @@ input[type="number"] { -moz-appearance: textfield; }
     background-clip: text;
 }
 
-/* APR Badge */
-.market-apr {
-    background: linear-gradient(135deg, rgba(245, 158, 11, 0.08), rgba(245, 158, 11, 0.04));
-    border: 1px solid rgba(245, 158, 11, 0.2);
-    color: #fbbf24;
-    padding: 1rem 1.25rem;
-    border-radius: var(--radius-sm);
-    font-size: 0.85rem;
-    margin-top: 1rem;
-    text-align: center;
-    display: none;
-    box-shadow: 0 4px 16px -4px rgba(245, 158, 11, 0.1);
-    animation: fadeIn 0.4s ease;
-    font-weight: 500;
-}
-
-.market-apr strong {
-    display: block;
-    margin-top: 0.35rem;
-    font-size: 1.3rem;
-    color: var(--accent);
-    letter-spacing: -0.02em;
-}
 
 /* ---------- Buttons ---------- */
 .button-group {

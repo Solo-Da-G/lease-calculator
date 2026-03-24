@@ -1,8 +1,10 @@
+/* 
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW registration failed:', err));
     });
 }
+*/
 
 document.addEventListener('DOMContentLoaded', () => {
     const toggleBtn = document.getElementById('themeToggle');
@@ -129,19 +131,16 @@ function calculateFlat() {
 
         if (annualAPR > 0) {
             document.getElementById('r_interest').value = annualAPR.toFixed(2);
-            document.getElementById('apr_box').style.display = 'block';
             updateUI('f_resAPR', annualAPR, true);
         } else {
             // Edge case: flat rate is 0%, meaning 0% TVM rate
             document.getElementById('r_interest').value = "0";
-            document.getElementById('apr_box').style.display = 'block';
             updateUI('f_resAPR', 0, true);
         }
         
         // Trigger reducing calculation when mapping over
         calculateReducing();
     } else {
-        document.getElementById('apr_box').style.display = 'none';
         ['f_resInterest','f_resTotal','f_resMonthly', 'f_resAPR'].forEach(id => updateUI(id, 0));
     }
 }
@@ -206,6 +205,8 @@ function calculateReducing() {
 
 function generateSchedule(type) {
     const data = {
+        assetType: document.getElementById('r_asset_type').value,
+        clientName: document.getElementById('r_client_name').value,
         price: getNum('r_price'),
         extras: getNum('r_extras'),
         months: Number(document.getElementById('r_months').value) || 0,
@@ -214,6 +215,8 @@ function generateSchedule(type) {
         insPer: Number(document.getElementById('r_ins_per').value) || 0,
         admPer: Number(document.getElementById('r_adm_per').value) || 0,
         advanceQty: Number(document.getElementById('r_advance').value) || 0,
+        disburseDate: document.getElementById('r_disburse_date').value,
+        startDate: document.getElementById('r_start_date').value,
         type: type
     };
 

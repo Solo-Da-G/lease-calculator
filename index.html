@@ -94,11 +94,6 @@
                 <span><i class="fa-solid fa-wallet" style="opacity:0.6;margin-right:6px;font-size:0.8rem;"></i>Monthly Rental</span>
                 <span class="result-value" id="f_resMonthly">-</span>
             </div>
-            <div class="market-apr" id="apr_box">
-                <i class="fa-solid fa-chart-pie" style="margin-right:4px;"></i>
-                Effective TVM Market Rate (APR):
-                <strong id="f_resAPR">0.00%</strong>
-            </div>
         </div>
 
         <div class="footer-link">
@@ -122,6 +117,14 @@
         </div>
 
         <div class="input-grid">
+            <div class="input-group full-width">
+                <label for="r_asset_type">Asset Type</label>
+                <input type="text" id="r_asset_type" placeholder="e.g. Toyota Camry 2025">
+            </div>
+            <div class="input-group full-width">
+                <label for="r_client_name">Name of the Client</label>
+                <input type="text" id="r_client_name" placeholder="Full name or Company">
+            </div>
             <div class="input-group">
                 <label for="r_price">Cost of Asset</label>
                 <input type="text" inputmode="numeric" id="r_price" placeholder="0.00" class="comma-input">
@@ -153,6 +156,14 @@
             <div class="input-group">
                 <label for="r_advance">Adv. Rental (Qty)</label>
                 <input type="number" id="r_advance" placeholder="0">
+            </div>
+            <div class="input-group">
+                <label for="r_disburse_date">Date of Disbursement</label>
+                <input type="date" id="r_disburse_date">
+            </div>
+            <div class="input-group">
+                <label for="r_start_date">Repayment Start Date</label>
+                <input type="date" id="r_start_date">
             </div>
         </div>
 

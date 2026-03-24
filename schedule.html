@@ -8,6 +8,38 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://kit.fontawesome.com/c1db006cdf.js" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="css/style.css">
+    <style>
+        .schedule-logo {
+            display: block;
+            margin: 0 auto 1rem auto;
+            max-width: 200px;
+            height: auto;
+            background: #fff;
+            padding: 10px 16px;
+            border-radius: 12px;
+        }
+        @media print {
+            body { background: #fff !important; color: #000 !important; }
+            .theme-toggle, .back-link, .button-group, .schedule-logo, .results-card, .card-header, .icon-circle { display: none !important; }
+            .wrapper { max-width: 100% !important; padding: 0 !important; margin: 0 !important; }
+            .calc-container { box-shadow: none !important; border: none !important; background: #fff !important; padding: 0 !important; }
+            
+            .print-only-header { 
+                display: block !important; 
+                text-align: center !important; 
+                margin-bottom: 2rem !important;
+                color: #000 !important;
+            }
+            .print-only-header img { max-width: 180px; margin-bottom: 1rem; }
+            .print-only-header h1 { font-size: 1.6rem !important; margin: 5px 0 !important; font-weight: 800 !important; }
+            .print-only-header h2 { font-size: 1.2rem !important; margin: 5px 0 !important; font-weight: 700 !important; color: #333 !important; }
+            .print-only-header p { font-size: 1rem !important; margin: 4px 0 !important; font-weight: 600 !important; }
+            
+            table { border-collapse: collapse; width: 100%; border: 1px solid #000 !important; }
+            th, td { border: 1px solid #000 !important; padding: 6px 8px !important; font-size: 11px !important; color: #000 !important; }
+            thead tr { background: #f0f0f0 !important; -webkit-print-color-adjust: exact; }
+        }
+    </style>
     
     <!-- PWA Setup -->
     <link rel="manifest" href="manifest.json">
@@ -27,8 +59,19 @@
 </button>
 
 <div class="wrapper" style="max-width: 1000px;">
+    <!-- Dedicated Print Header (Hidden on Screen) -->
+    <div class="print-only-header" style="display: none;">
+        <img src="./miss-logo.png" alt="Logo">
+        <h1 id="printClient"></h1>
+        <h2 id="printAsset"></h2>
+        <p id="printSummary"></p>
+        <p id="printDate"></p>
+    </div>
+
     <div class="calc-container" style="max-width: 100%; min-width: 100%; flex: none;">
         
+        <img src="./miss-logo.png" alt="Miss Leasing Logo" class="schedule-logo">
+
         <a href="index.html" class="back-link">
             <i class="fa-solid fa-arrow-left"></i> Back to Calculator
         </a>
@@ -41,8 +84,11 @@
             </div>
         </div>
         
-        <div class="results-card" style="text-align: center; border: none; margin-top: 0;">
-            <p id="summaryText" style="margin: 0; font-weight: 600; font-size: 1rem; background: linear-gradient(135deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;"></p>
+        <div class="results-card" style="text-align: center; border: none; margin-top: 0; padding-bottom: 0.5rem;">
+            <p id="clientText" style="margin: 0 0 4px 0; font-weight: 800; font-size: 1.3rem; color: var(--text-main); letter-spacing: -0.01em;"></p>
+            <p id="assetText" style="margin: 0 0 8px 0; font-weight: 600; font-size: 1rem; color: var(--text-secondary);"></p>
+            <p id="summaryText" style="margin: 0; font-weight: 600; font-size: 0.95rem; background: linear-gradient(135deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;"></p>
+            <p id="dateText" style="margin: 10px 0 0 0; font-size: 0.85rem; color: var(--text-muted); font-weight: 500;"></p>
         </div>
 
         <div style="overflow-x: auto; margin-top: 1.5rem; border-radius: 16px; border: 1px solid var(--card-border);">
@@ -50,6 +96,7 @@
                 <thead>
                     <tr>
                         <th>Period</th>
+                        <th>Date</th>
                         <th>Balance B/F</th>
                         <th>Principal</th>
                         <th>Interest</th>
@@ -124,6 +171,13 @@ document.addEventListener('DOMContentLoaded', () => {
     let totalRepaymentSum = 0;
 
     const fNum = val => val.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    const fDate = (d) => {
+        if (!d || isNaN(d.getTime())) return '-';
+        return d.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    };
+
+    let currentDate = data.startDate ? new Date(data.startDate) : null;
+    let disburseDate = data.disburseDate ? new Date(data.disburseDate) : null;
 
     if (advanceQty > 0) {
         const advTotal = pmt * advanceQty;
@@ -132,6 +186,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const row = `<tr>
             <td><strong style="color:var(--accent);">0 (Adv)</strong></td>
+            <td>${fDate(disburseDate || currentDate)}</td>
             <td>${fNum(assetCost)}</td>
             <td>${fNum(advTotal)}</td>
             <td>0.00</td>
@@ -163,6 +218,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const row = `<tr>
             <td>${i}</td>
+            <td>${fDate(currentDate)}</td>
             <td>${fNum(runningBalance)}</td>
             <td>${fNum(principal)}</td>
             <td>${fNum(interest)}</td>
@@ -173,10 +229,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
         tbody.innerHTML += row;
         runningBalance = closing;
+
+        if (currentDate) {
+            if (isWeekly) {
+                currentDate.setDate(currentDate.getDate() + 7);
+            } else {
+                currentDate.setMonth(currentDate.getMonth() + 1);
+            }
+        }
     }
 
     const footerRow = `<tr style="font-weight: 800; background: rgba(0,0,0,0.02); box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);">
-        <td colspan="2" style="text-align: right; color: var(--text-main); text-transform: uppercase;">Total:</td>
+        <td colspan="3" style="text-align: right; color: var(--text-main); text-transform: uppercase;">Total:</td>
         <td style="color: var(--text-main);">${fNum(totalPrincipalSum)}</td>
         <td style="color: var(--text-main);">${fNum(totalInterestSum)}</td>
         <td style="color: var(--text-main);">${fNum(totalVatSum)}</td>
@@ -186,8 +250,22 @@ document.addEventListener('DOMContentLoaded', () => {
     tbody.innerHTML += footerRow;
 
     const mode = data.type.charAt(0).toUpperCase() + data.type.slice(1);
+    document.getElementById('clientText').innerText = data.clientName ? `Client: ${data.clientName}` : '';
+    document.getElementById('assetText').innerText = data.assetType ? `Asset: ${data.assetType}` : 'Lease Schedule';
     document.getElementById('summaryText').innerText = 
-        `${mode} Schedule  ·  Asset Cost: ${fNum(assetCost)}  ·  Annual Rate: ${data.annualRate}%`;
+        `${mode} Repayment Plan  ·  Cost: ${fNum(assetCost)}`;
+    
+    if (disburseDate) {
+        document.getElementById('dateText').innerText = `Date of Disbursement: ${fDate(disburseDate)}`;
+    }
+
+    // Populate Print Header
+    document.getElementById('printClient').innerText = data.clientName ? `Client: ${data.clientName}` : '';
+    document.getElementById('printAsset').innerText = data.assetType ? `Asset: ${data.assetType}` : 'Lease Schedule';
+    document.getElementById('printSummary').innerText = `${mode} Repayment Plan  ·  Cost: ${fNum(assetCost)}`;
+    if (disburseDate) {
+        document.getElementById('printDate').innerText = `Date of Disbursement: ${fDate(disburseDate)}`;
+    }
 });
 
 function shareWhatsApp() {
@@ -236,7 +314,7 @@ function shareWhatsApp() {
     let text = `*📊 Lease Repayment Schedule*\n\n`;
     text += `*Asset Cost:* ${fNum(assetCost)}\n`;
     text += `*Tenor:* ${months} Months\n`;
-    text += `*Annual Rate:* ${data.annualRate}%\n`;
+
     text += `*Payment Mode:* ${modeName}\n\n`;
     
     text += `*Total Initial Payment:* ${fNum(totalInitialPayment)}\n`;
