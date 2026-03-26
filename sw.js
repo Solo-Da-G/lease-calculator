@@ -5,7 +5,8 @@ const ASSETS_TO_CACHE = [
     './schedule.html',
     './css/style.css',
     './js/calculator.js',
-    './miss-logo.png'
+    './miss-logo.png',
+    './icon-512.png'
 ];
 
 // Install Event - Force taking over
