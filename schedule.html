@@ -333,13 +333,14 @@ function shareWhatsApp() {
     text += `*Total Initial Payment:* ${fNum(totalInitialPayment)}\n`;
     if (advanceQty > 0 || initialFeesAmount > 0) {
         text += `_Breakdown:_\n`;
-        if (advanceQty > 0) text += `- Advance Rental: ${fNum(advTotal)}\n`;
-        if (insAmt > 0) text += `- Insurance: ${fNum(insAmt)}\n`;
-        if (admAmt > 0) text += `- Admin Fee: ${fNum(admAmt)}\n`;
+        if (advanceQty > 0) text += `* Advance Rental: ${fNum(advTotal)}\n`;
+        if (insAmt > 0) text += `* Insurance: ${fNum(insAmt)}\n`;
+        if (admAmt > 0) text += `* Admin Fee: ${fNum(admAmt)}\n`;
     }
     text += `\n`;
     
-    text += `*${modeName} Payment:* ${fNum(standardPayment)} (inclusive of VAT)\n\n`;
+    const vatLabel = (data.vatPer > 0) ? "(inclusive of VAT)" : "(exclusive of VAT)";
+    text += `*${modeName} Payment:* ${fNum(standardPayment)} ${vatLabel}\n\n`;
     
     text += `*Total Principal:* ${fNum(assetCost)}\n`;
     text += `*Total Interest:* ${fNum(totalInterest)}\n`;
