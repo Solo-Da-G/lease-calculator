@@ -195,11 +195,14 @@ function calculateReducing() {
         const totalVat = (vatPer / 100) * totalInterest;
         const monthlyWithVat = pmt + (totalVat / months);
 
+        const totalRepayment = assetCost + totalInterest + totalVat;
+
         updateUI('r_resInitial', initialFees + advanceAmount);
         updateUI('r_resInterest', totalInterest);
+        updateUI('r_resTotal', totalRepayment);
         updateUI('r_resMonthly', monthlyWithVat);
     } else {
-        ['r_resInitial','r_resInterest','r_resMonthly'].forEach(id => updateUI(id, 0));
+        ['r_resInitial','r_resInterest','r_resTotal','r_resMonthly'].forEach(id => updateUI(id, 0));
     }
 }
 
