@@ -72,11 +72,11 @@
             </div>
             <div class="input-group">
                 <label for="f_months">Tenor (Months)</label>
-                <input type="number" id="f_months" placeholder="12">
+                <input type="number" id="f_months" placeholder="12" min="0">
             </div>
             <div class="input-group">
                 <label for="f_interest">Flat Int. Rate (%)</label>
-                <input type="number" id="f_interest" placeholder="0">
+                <input type="number" id="f_interest" placeholder="0" min="0">
             </div>
         </div>
 
@@ -94,6 +94,10 @@
             <div class="result-item highlight">
                 <span><i class="fa-solid fa-wallet" style="opacity:0.6;margin-right:6px;font-size:0.8rem;"></i>Monthly Rental</span>
                 <span class="result-value" id="f_resMonthly">-</span>
+            </div>
+            <div class="result-item">
+                <span><i class="fa-solid fa-right-left" style="opacity:0.4;margin-right:6px;font-size:0.75rem;"></i>Reducing Equivalent (APR)</span>
+                <span class="result-value" id="f_resAPR">-</span>
             </div>
         </div>
 
@@ -136,27 +140,27 @@
             </div>
             <div class="input-group">
                 <label for="r_ins_per">Insurance (%)</label>
-                <input type="number" id="r_ins_per" placeholder="0">
+                <input type="number" id="r_ins_per" placeholder="0" min="0">
             </div>
             <div class="input-group">
                 <label for="r_adm_per">Admin (%)</label>
-                <input type="number" id="r_adm_per" placeholder="0">
+                <input type="number" id="r_adm_per" placeholder="0" min="0">
             </div>
             <div class="input-group">
                 <label for="r_months">Tenor (Months)</label>
-                <input type="number" id="r_months" placeholder="12">
+                <input type="number" id="r_months" placeholder="12" min="0">
             </div>
             <div class="input-group">
                 <label for="r_interest">Annual Rate (%)</label>
-                <input type="number" id="r_interest" placeholder="0">
+                <input type="number" id="r_interest" placeholder="0" min="0">
             </div>
             <div class="input-group">
                 <label for="r_vat_per">VAT (%)</label>
-                <input type="number" id="r_vat_per" placeholder="0">
+                <input type="number" id="r_vat_per" placeholder="0" min="0">
             </div>
             <div class="input-group">
                 <label for="r_advance">Adv. Rental (Qty)</label>
-                <input type="number" id="r_advance" placeholder="0">
+                <input type="number" id="r_advance" placeholder="0" min="0">
             </div>
             <div class="input-group">
                 <label for="r_disburse_date">Date of Disbursement</label>
@@ -211,5 +215,13 @@
 </div>
 
 <script src="js/calculator.js"></script>
+<script>
+    // Global safety: Disable mouse wheel on all number inputs to prevent accidental value changes while scrolling
+    document.addEventListener('wheel', function(event) {
+        if (document.activeElement.type === 'number') {
+            document.activeElement.blur();
+        }
+    });
+</script>
 </body>
 </html>

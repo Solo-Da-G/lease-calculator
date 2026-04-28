@@ -17,9 +17,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const allInputs = document.querySelectorAll('input');
     allInputs.forEach(input => {
-        input.addEventListener('input', () => {
-            calculateFlat();
-            calculateReducing();
+        input.addEventListener('input', (e) => {
+            // Only trigger syncing if the input belongs to the Flat Rate section
+            if (e.target.id.startsWith('f_')) {
+                calculateFlat();
+            } else {
+                calculateReducing();
+            }
         });
     });
 
@@ -100,12 +104,13 @@ function updateUI(id, val, isPercent = false) {
 }
 
 function calculateFlat() {
-    const price = getNum('f_price');
-    const plate = getNum('f_plate');
-    const hmo = getNum('f_heal');
-    const tech = getNum('f_tech');
-    const months = Number(document.getElementById('f_months').value) || 0;
-    const flatRate = Number(document.getElementById('f_interest').value) || 0;
+    const price = Math.abs(getNum('f_price'));
+    const plate = Math.abs(getNum('f_plate'));
+    // f_heal (HMO) is currently hidden/commented in HTML
+    const hmo = document.getElementById('f_heal') ? Math.abs(getNum('f_heal')) : 0;
+    const tech = Math.abs(getNum('f_tech'));
+    const months = Math.abs(Number(document.getElementById('f_months').value)) || 0;
+    const flatRate = Math.abs(Number(document.getElementById('f_interest').value)) || 0;
 
     if (price > 0 && months > 0) {
         const principal = price + plate + hmo + tech;
@@ -118,9 +123,16 @@ function calculateFlat() {
         updateUI('f_resMonthly', monthlyRental);
 
         const extrasTotal = plate + hmo + tech;
+        
+        // Smarter syncing: Only overwrite Reducing fields if they are empty or already match the Flat Rate values
+        const rPriceEl = document.getElementById('r_price');
+        const rExtrasEl = document.getElementById('r_extras');
+        const rMonthsEl = document.getElementById('r_months');
+        const rInterestEl = document.getElementById('r_interest');
+
         setCommaValue('r_price', price === 0 ? '' : price);
         setCommaValue('r_extras', extrasTotal === 0 ? '' : extrasTotal);
-        document.getElementById('r_months').value = months === 0 ? "" : months;
+        rMonthsEl.value = months === 0 ? "" : months;
 
         // Ensure monthlyRental is strictly greater than principal / months to solve for rate
         let annualAPR = 0;
@@ -130,11 +142,11 @@ function calculateFlat() {
         }
 
         if (annualAPR > 0) {
-            document.getElementById('r_interest').value = annualAPR.toFixed(2);
+            rInterestEl.value = annualAPR.toFixed(2);
             updateUI('f_resAPR', annualAPR, true);
         } else {
             // Edge case: flat rate is 0%, meaning 0% TVM rate
-            document.getElementById('r_interest').value = "0";
+            rInterestEl.value = "0";
             updateUI('f_resAPR', 0, true);
         }
         
@@ -160,14 +172,27 @@ function solveForRate(pv, pmt, n) {
 }
 
 function calculateReducing() {
-    const price = getNum('r_price');
-    const extras = getNum('r_extras');
-    const insPer = Number(document.getElementById('r_ins_per').value) || 0;
-    const admPer = Number(document.getElementById('r_adm_per').value) || 0;
-    const months = Number(document.getElementById('r_months').value) || 0;
-    const advanceQty = Number(document.getElementById('r_advance').value) || 0;
-    const annualRate = Number(document.getElementById('r_interest').value) || 0;
-    const vatPer = Number(document.getElementById('r_vat_per').value) || 0;
+    const price = Math.abs(getNum('r_price'));
+    const extras = Math.abs(getNum('r_extras'));
+    const insPer = Math.abs(Number(document.getElementById('r_ins_per').value)) || 0;
+    const admPer = Math.abs(Number(document.getElementById('r_adm_per').value)) || 0;
+    const months = Math.abs(Number(document.getElementById('r_months').value)) || 0;
+    const annualRate = Math.abs(Number(document.getElementById('r_interest').value)) || 0;
+    const rVatEl = document.getElementById('r_vat_per');
+    const rAdvEl = document.getElementById('r_advance');
+    
+    const vatPer = Math.abs(Number(rVatEl.value)) || 0;
+    let advanceQty = Math.abs(Number(rAdvEl.value)) || 0;
+
+    // Sanitize UI if negative values were entered (e.g. via typing)
+    if (Number(rVatEl.value) < 0) rVatEl.value = vatPer;
+    if (Number(rAdvEl.value) < 0) rAdvEl.value = advanceQty;
+    
+    // Cap advance quantity at total months
+    if (advanceQty > months) {
+        advanceQty = months;
+        rAdvEl.value = months;
+    }
 
     if (price > 0 && months > 0) {
         const assetCost = price + extras;

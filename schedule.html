@@ -142,7 +142,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const assetCost = data.price + data.extras;
     const monthlyRate = (data.annualRate / 100) / 12;
     const months = data.months;
-    const advanceQty = data.advanceQty || 0;
+    let advanceQty = data.advanceQty || 0;
+    if (advanceQty > months) advanceQty = months;
+
     const type = data.type || 'monthly';
     let div = 1;
     let modeLabel = 'Monthly';
@@ -287,7 +289,9 @@ function shareWhatsApp() {
     const assetCost = data.price + data.extras;
     const monthlyRate = (data.annualRate / 100) / 12;
     const months = data.months;
-    const advanceQty = data.advanceQty || 0;
+    let advanceQty = data.advanceQty || 0;
+    if (advanceQty > months) advanceQty = months;
+
     const type = data.type || 'monthly';
     let div = 1;
     let modeName = 'Monthly';
