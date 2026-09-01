@@ -101,7 +101,6 @@
                         <th>Balance B/F</th>
                         <th>Principal</th>
                         <th>Interest</th>
-                        <th>VAT</th>
                         <th>Total Payment</th>
                         <th>Balance C/F</th>
                     </tr>
@@ -166,18 +165,12 @@ document.addEventListener('DOMContentLoaded', () => {
     let totalInterest = (pmt * months) - assetCost;
     if (totalInterest < 0) totalInterest = 0;
     const totalVat = (data.vatPer / 100) * totalInterest;
-    
-    const totalPeriods = Math.round((months - advanceQty) * div);
-    const periodPmt = pmt / div;
-    const periodVat = (totalVat / months) / div;
-    const periodRate = monthlyRate / div;
 
     const tbody = document.getElementById('tableBody');
     let runningBalance = assetCost;
     
     let totalPrincipalSum = 0;
     let totalInterestSum = 0;
-    let totalVatSum = 0;
     let totalRepaymentSum = 0;
 
     const fNum = val => val.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
@@ -200,7 +193,6 @@ document.addEventListener('DOMContentLoaded', () => {
             <td>${fNum(assetCost)}</td>
             <td>${fNum(advTotal)}</td>
             <td>0.00</td>
-            <td>0.00</td>
             <td style="font-weight:700; color:var(--text-main);">${fNum(advTotal)}</td>
             <td>${fNum(assetCost - advTotal)}</td>
         </tr>`;
@@ -208,37 +200,73 @@ document.addEventListener('DOMContentLoaded', () => {
         runningBalance -= advTotal;
     }
 
-    for (let i = 1; i <= totalPeriods; i++) {
-        let interest = runningBalance * periodRate;
-        if (monthlyRate === 0) interest = 0;
+    const amortMonths = months - advanceQty;
+    const monthlyInterestPer = [];
+    const monthlyPrincipalPer = [];
+    const monthlyPaymentPer = [];
+    const monthlyVatPer = totalVat / months;
+    let monthBalance = assetCost;
+    for (let m = 0; m < amortMonths; m++) {
+        let mInterest = monthBalance * monthlyRate;
+        if (monthlyRate === 0) mInterest = 0;
+        let mPrincipal = pmt - mInterest;
+        if (m === amortMonths - 1) {
+            mPrincipal = monthBalance;
+        }
+        monthlyInterestPer.push(mInterest);
+        monthlyPrincipalPer.push(mPrincipal);
+        monthlyPaymentPer.push(pmt + monthlyVatPer);
+        monthBalance -= mPrincipal;
+    }
 
-        let principal = periodPmt - interest;
-        let totalWithVat = periodPmt + periodVat;
-        let closing = runningBalance - principal;
-        
-        if (i === totalPeriods) {
-            closing = 0;
-            principal = runningBalance; 
+    const monthsPerPeriod = 1 / div;
+    const totalOutPeriods = Math.round(amortMonths * div);
+    let periodNum = 1;
+
+    for (let p = 0; p < totalOutPeriods; p++) {
+        const startMonthFrac = p * monthsPerPeriod;
+        const endMonthFrac = (p + 1) * monthsPerPeriod;
+
+        let periodInterest = 0;
+        let periodPrincipal = 0;
+        let periodPayment = 0;
+
+        const startIdx = Math.floor(startMonthFrac);
+        const endIdx = Math.ceil(endMonthFrac);
+
+        for (let mi = startIdx; mi < endIdx && mi < amortMonths; mi++) {
+            const monthStart = Math.max(mi, startMonthFrac);
+            const monthEnd = Math.min(mi + 1, endMonthFrac);
+            const fraction = monthEnd - monthStart;
+            periodInterest += monthlyInterestPer[mi] * fraction;
+            periodPrincipal += monthlyPrincipalPer[mi] * fraction;
+            periodPayment += monthlyPaymentPer[mi] * fraction;
         }
 
-        totalPrincipalSum += principal;
-        totalInterestSum += interest;
-        totalVatSum += periodVat;
-        totalRepaymentSum += totalWithVat;
+        const isLastPeriod = (p === totalOutPeriods - 1);
+        let closing = runningBalance - periodPrincipal;
+        if (isLastPeriod) {
+            periodPrincipal = runningBalance;
+            closing = 0;
+        }
+
+        totalPrincipalSum += periodPrincipal;
+        totalInterestSum += periodInterest;
+        totalRepaymentSum += periodPayment;
 
         const row = `<tr>
-            <td>${i}</td>
+            <td>${periodNum}</td>
             <td>${fDate(currentDate)}</td>
             <td>${fNum(runningBalance)}</td>
-            <td>${fNum(principal)}</td>
-            <td>${fNum(interest)}</td>
-            <td>${fNum(periodVat)}</td>
-            <td style="font-weight:700; color:var(--text-main);">${fNum(totalWithVat)}</td>
+            <td>${fNum(periodPrincipal)}</td>
+            <td>${fNum(periodInterest)}</td>
+            <td style="font-weight:700; color:var(--text-main);">${fNum(periodPayment)}</td>
             <td>${fNum(Math.max(0, closing))}</td>
         </tr>`;
 
         tbody.innerHTML += row;
         runningBalance = closing;
+        periodNum++;
 
         if (currentDate) {
             if (type === 'weekly') currentDate.setDate(currentDate.getDate() + 7);
@@ -253,7 +281,6 @@ document.addEventListener('DOMContentLoaded', () => {
         <td colspan="3" style="text-align: right; color: var(--text-main); text-transform: uppercase;">Total:</td>
         <td style="color: var(--text-main);">${fNum(totalPrincipalSum)}</td>
         <td style="color: var(--text-main);">${fNum(totalInterestSum)}</td>
-        <td style="color: var(--text-main);">${fNum(totalVatSum)}</td>
         <td style="color: var(--primary); font-size: 1.05rem;">${fNum(totalRepaymentSum)}</td>
         <td>-</td>
     </tr>`;
