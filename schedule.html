@@ -182,30 +182,33 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentDate = data.startDate ? new Date(data.startDate) : null;
     let disburseDate = data.disburseDate ? new Date(data.disburseDate) : null;
 
+    const monthlyVatPer = totalVat / months;
+
     if (advanceQty > 0) {
-        const advTotal = pmt * advanceQty;
-        totalPrincipalSum += advTotal;
+        const advLoanPart = pmt * advanceQty;
+        const advVatPart = monthlyVatPer * advanceQty;
+        const advTotal = advLoanPart + advVatPart;
+        totalPrincipalSum += advLoanPart;
         totalRepaymentSum += advTotal;
-        
+
         const row = `<tr>
             <td><strong style="color:var(--accent);">0 (Adv)</strong></td>
             <td>${fDate(disburseDate || currentDate)}</td>
             <td>${fNum(assetCost)}</td>
-            <td>${fNum(advTotal)}</td>
+            <td>${fNum(advLoanPart)}</td>
             <td>0.00</td>
             <td style="font-weight:700; color:var(--text-main);">${fNum(advTotal)}</td>
-            <td>${fNum(assetCost - advTotal)}</td>
+            <td>${fNum(assetCost - advLoanPart)}</td>
         </tr>`;
         tbody.innerHTML += row;
-        runningBalance -= advTotal;
+        runningBalance -= advLoanPart;
     }
 
     const amortMonths = months - advanceQty;
     const monthlyInterestPer = [];
     const monthlyPrincipalPer = [];
     const monthlyPaymentPer = [];
-    const monthlyVatPer = totalVat / months;
-    let monthBalance = assetCost;
+    let monthBalance = assetCost - (pmt * advanceQty);
     for (let m = 0; m < amortMonths; m++) {
         let mInterest = monthBalance * monthlyRate;
         if (monthlyRate === 0) mInterest = 0;
@@ -277,11 +280,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    const footerTotalPrincipal = assetCost;
+    const footerTotalRepayment = assetCost + totalInterest + totalVat;
     const footerRow = `<tr style="font-weight: 800; background: rgba(0,0,0,0.02); box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);">
         <td colspan="3" style="text-align: right; color: var(--text-main); text-transform: uppercase;">Total:</td>
-        <td style="color: var(--text-main);">${fNum(totalPrincipalSum)}</td>
-        <td style="color: var(--text-main);">${fNum(totalInterestSum)}</td>
-        <td style="color: var(--primary); font-size: 1.05rem;">${fNum(totalRepaymentSum)}</td>
+        <td style="color: var(--text-main);">${fNum(footerTotalPrincipal)}</td>
+        <td style="color: var(--text-main);">${fNum(totalInterest)}</td>
+        <td style="color: var(--primary); font-size: 1.05rem;">${fNum(footerTotalRepayment)}</td>
         <td>-</td>
     </tr>`;
     tbody.innerHTML += footerRow;
@@ -347,7 +352,9 @@ function shareWhatsApp() {
     const periodVat = (totalVat / months) / div;
     const standardPayment = periodPmt + periodVat;
     const periods = (months - advanceQty) * div;
-    const advTotal = pmt * advanceQty;
+    const advPmtPart = pmt * advanceQty;
+    const advVatPart = (totalVat / months) * advanceQty;
+    const advTotal = advPmtPart + advVatPart;
     const totalRepayment = advTotal + (standardPayment * periods);
 
     const insAmt = ((data.insPer || 0) / 100) * assetCost;
