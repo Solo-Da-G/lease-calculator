@@ -222,14 +222,32 @@ function calculateReducing() {
 
         const totalRepayment = assetCost + totalInterest + totalVat;
 
+        const totalInterestVatInclusive = totalInterest + totalVat;
+
         updateUI('r_resInitial', initialFees + advanceAmount);
         updateUI('r_resVat', totalVat);
-        updateUI('r_resInterest', totalInterest);
+        updateUI('r_resInterest', totalInterestVatInclusive);
         updateUI('r_resVAT', totalVat);
         updateUI('r_resTotal', totalRepayment);
         updateUI('r_resMonthly', monthlyWithVat);
+
+        const interestLabel = document.querySelector('label[for="r_resInterest"]') || 
+                              document.querySelector('#r_resInterest').closest('.result-item').querySelector('span:first-child');
+        if (interestLabel) {
+            const originalLabel = 'Total Interest';
+            if (vatPer > 0) {
+                interestLabel.innerHTML = `<i class="fa-solid fa-percent" style="opacity:0.4;margin-right:6px;font-size:0.75rem;"></i>Total Interest (incl. ${vatPer}% VAT)`;
+            } else {
+                interestLabel.innerHTML = `<i class="fa-solid fa-percent" style="opacity:0.4;margin-right:6px;font-size:0.75rem;"></i>${originalLabel}`;
+            }
+        }
     } else {
         ['r_resInitial','r_resVat','r_resInterest','r_resTotal','r_resMonthly'].forEach(id => updateUI(id, 0));
+        const interestLabel = document.querySelector('label[for="r_resInterest"]') || 
+                              document.querySelector('#r_resInterest').closest('.result-item').querySelector('span:first-child');
+        if (interestLabel) {
+            interestLabel.innerHTML = `<i class="fa-solid fa-percent" style="opacity:0.4;margin-right:6px;font-size:0.75rem;"></i>Total Interest`;
+        }
     }
 }
 

@@ -92,6 +92,10 @@
             <p id="dateText" style="margin: 10px 0 0 0; font-size: 0.85rem; color: var(--text-muted); font-weight: 500;"></p>
         </div>
 
+        <div id="vatSummaryCard" style="margin-top: 1rem; padding: 1rem 1.25rem; border-radius: 14px; border: 1.5px dashed var(--card-border); background: rgba(0,0,0,0.01); text-align: center; display: none;">
+            <p id="vatSummaryText" style="margin: 0; font-weight: 600; font-size: 0.95rem; color: var(--text-secondary); line-height: 1.6;"></p>
+        </div>
+
         <div style="overflow-x: auto; margin-top: 1.5rem; border-radius: 16px; border: 1px solid var(--card-border);">
             <table style="margin-top: 0; box-shadow: none; border: none;">
                 <thead>
@@ -196,7 +200,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <td>${fDate(disburseDate || currentDate)}</td>
             <td>${fNum(assetCost)}</td>
             <td>${fNum(advLoanPart)}</td>
-            <td>0.00</td>
+            <td>${fNum(advVatPart)}</td>
             <td style="font-weight:700; color:var(--text-main);">${fNum(advTotal)}</td>
             <td>${fNum(assetCost - advLoanPart)}</td>
         </tr>`;
@@ -218,7 +222,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         monthlyInterestPer.push(mInterest);
         monthlyPrincipalPer.push(mPrincipal);
-        monthlyPaymentPer.push(pmt + monthlyVatPer);
+        monthlyPaymentPer.push(pmt);
         monthBalance -= mPrincipal;
     }
 
@@ -246,6 +250,10 @@ document.addEventListener('DOMContentLoaded', () => {
             periodPayment += monthlyPaymentPer[mi] * fraction;
         }
 
+        const periodVat = monthlyVatPer * monthsPerPeriod;
+        const periodInterestVatInclusive = periodInterest + periodVat;
+        const periodPaymentVatInclusive = periodPayment + periodVat;
+
         const isLastPeriod = (p === totalOutPeriods - 1);
         let closing = runningBalance - periodPrincipal;
         if (isLastPeriod) {
@@ -254,16 +262,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         totalPrincipalSum += periodPrincipal;
-        totalInterestSum += periodInterest;
-        totalRepaymentSum += periodPayment;
+        totalInterestSum += periodInterestVatInclusive;
+        totalRepaymentSum += periodPaymentVatInclusive;
 
         const row = `<tr>
             <td>${periodNum}</td>
             <td>${fDate(currentDate)}</td>
             <td>${fNum(runningBalance)}</td>
             <td>${fNum(periodPrincipal)}</td>
-            <td>${fNum(periodInterest)}</td>
-            <td style="font-weight:700; color:var(--text-main);">${fNum(periodPayment)}</td>
+            <td>${fNum(periodInterestVatInclusive)}</td>
+            <td style="font-weight:700; color:var(--text-main);">${fNum(periodPaymentVatInclusive)}</td>
             <td>${fNum(Math.max(0, closing))}</td>
         </tr>`;
 
@@ -281,11 +289,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const footerTotalPrincipal = assetCost;
+    const footerTotalInterestVatInclusive = totalInterest + totalVat;
     const footerTotalRepayment = assetCost + totalInterest + totalVat;
     const footerRow = `<tr style="font-weight: 800; background: rgba(0,0,0,0.02); box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);">
         <td colspan="3" style="text-align: right; color: var(--text-main); text-transform: uppercase;">Total:</td>
         <td style="color: var(--text-main);">${fNum(footerTotalPrincipal)}</td>
-        <td style="color: var(--text-main);">${fNum(totalInterest)}</td>
+        <td style="color: var(--text-main);">${fNum(footerTotalInterestVatInclusive)}</td>
         <td style="color: var(--primary); font-size: 1.05rem;">${fNum(footerTotalRepayment)}</td>
         <td>-</td>
     </tr>`;
@@ -299,6 +308,32 @@ document.addEventListener('DOMContentLoaded', () => {
     
     if (disburseDate) {
         document.getElementById('dateText').innerText = `Date of Disbursement: ${fDate(disburseDate)}`;
+    }
+
+    const vatSummaryCard = document.getElementById('vatSummaryCard');
+    const vatSummaryText = document.getElementById('vatSummaryText');
+    const periodLoanPmt = pmt / div;
+    const periodVatPmt = (totalVat / months) / div;
+    const periodActualPmt = periodLoanPmt + periodVatPmt;
+    const interestPlusVat = totalInterest + totalVat;
+    const totalGrand = assetCost + totalInterest + totalVat;
+
+    let vatMsg = '';
+    vatMsg += `<strong>Total Interest:</strong> ${fNum(totalInterest)}`;
+    if (totalVat > 0 || data.vatPer > 0) {
+        vatMsg += `&nbsp;&nbsp;+&nbsp;&nbsp;<strong>VAT (${fNum(data.vatPer)}%):</strong> ${fNum(totalVat)}`;
+        vatMsg += `<br><strong>Interest + VAT:</strong> ${fNum(interestPlusVat)}`;
+        vatMsg += `&nbsp;&nbsp;→&nbsp;&nbsp;<strong>Grand Total (Cost + Interest + VAT):</strong> ${fNum(totalGrand)}`;
+        vatMsg += `<br><strong>Actual ${mode} Payment (inclusive of VAT):</strong> ${fNum(periodActualPmt)}`;
+        if (advanceQty > 0) {
+            const advLoan = pmt * advanceQty;
+            const advVat = (totalVat / months) * advanceQty;
+            vatMsg += `&nbsp;&nbsp;·&nbsp;&nbsp;<strong>Advance Rental (${advanceQty} mo, inc. VAT):</strong> ${fNum(advLoan + advVat)}`;
+        }
+    }
+    if (vatMsg) {
+        vatSummaryText.innerHTML = vatMsg;
+        vatSummaryCard.style.display = 'block';
     }
 
     // Populate Print Header
@@ -380,8 +415,10 @@ function shareWhatsApp() {
     const vatLabel = (data.vatPer > 0) ? "(inclusive of VAT)" : "(exclusive of VAT)";
     text += `*${modeName} Payment:* ${fNum(standardPayment)} ${vatLabel}\n\n`;
     
+    const totalInterestVatInclusive = totalInterest + totalVat;
+    const interestLabel = (data.vatPer > 0) ? `Total Interest (incl. ${data.vatPer}% VAT)` : `Total Interest`;
     text += `*Total Principal:* ${fNum(assetCost)}\n`;
-    text += `*Total Interest:* ${fNum(totalInterest)}\n`;
+    text += `*${interestLabel}:* ${fNum(totalInterestVatInclusive)}\n`;
     text += `*Total Repayment:* ${fNum(totalRepayment)}\n\n`;
     
     text += `_Powered by Miss Leasing_`;
