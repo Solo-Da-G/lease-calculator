@@ -101,7 +101,6 @@
                         <th>Balance B/F</th>
                         <th>Principal</th>
                         <th>Interest</th>
-                        <th>VAT</th>
                         <th>Total Payment</th>
                         <th>Balance C/F</th>
                     </tr>
@@ -122,115 +121,6 @@
 </div>
 
 <script>
-// Helper to solve for interest rate per period when total periods and payment are known
-function solvePeriodRate(pv, pmt, remainingPeriods, advancePeriods) {
-    if (remainingPeriods <= 0) return 0;
-    if (pmt * (remainingPeriods + advancePeriods) <= pv) return 0; // Prevent infinite loops or negative rates
-    
-    let i = 0.01;
-    for (let j = 0; j < 100; j++) {
-        let f = pmt * (((1 - Math.pow(1 + i, -remainingPeriods)) / i) + advancePeriods) - pv;
-        let df = pmt * ((remainingPeriods * Math.pow(1 + i, -remainingPeriods - 1) * i - (1 - Math.pow(1 + i, -remainingPeriods))) / Math.pow(i, 2));
-        let nextI = i - f / df;
-        if (Math.abs(nextI - i) < 0.0000001) return Math.max(0, nextI);
-        i = nextI;
-    }
-    return Math.max(0, i);
-}
-
-// Helper to calculate lease details consistently across schedule and sharing
-function calculateLeaseDetails(data) {
-    const price = data.price || 0;
-    const extras = data.extras || 0;
-    const assetCost = price + extras;
-    const months = data.months || 0;
-    const annualRate = data.annualRate || 0;
-    const vatPer = data.vatPer || 0;
-    const insPer = data.insPer || 0;
-    const admPer = data.admPer || 0;
-    let advanceQty = data.advanceQty || 0;
-    if (advanceQty > months) advanceQty = months;
-
-    // 1. Calculate the monthly baseline (which all frequencies must match)
-    const monthlyRate = (annualRate / 100) / 12;
-    let monthlyPmt = 0;
-    if (monthlyRate > 0) {
-        const factor = ((1 - Math.pow(1 + monthlyRate, -(months - advanceQty))) / monthlyRate) + advanceQty;
-        monthlyPmt = assetCost / factor;
-    } else {
-        monthlyPmt = assetCost / months;
-    }
-    
-    let totalInterest = (monthlyPmt * months) - assetCost;
-    if (totalInterest < 0) totalInterest = 0;
-    const totalVat = (vatPer / 100) * totalInterest;
-
-    // 2. Adjust for frequency
-    const type = data.type || 'monthly';
-    let periodsPerYear = 12;
-    let modeLabel = 'Monthly';
-
-    if (type === 'weekly') {
-        periodsPerYear = 52;
-        modeLabel = 'Weekly';
-    } else if (type === 'biweekly') {
-        periodsPerYear = 26;
-        modeLabel = 'Bi-weekly';
-    } else if (type === 'monthly') {
-        periodsPerYear = 12;
-        modeLabel = 'Monthly';
-    } else if (type === 'quarterly') {
-        periodsPerYear = 4;
-        modeLabel = 'Quarterly';
-    } else if (type === 'yearly') {
-        periodsPerYear = 1;
-        modeLabel = 'Yearly';
-    }
-
-    const div = periodsPerYear / 12;
-    const totalPeriods = Math.round(months * div);
-    const advancePeriods = Math.round(advanceQty * div);
-    const remainingPeriods = totalPeriods - advancePeriods;
-
-    // The payment per period is simply the monthly payment divided by div
-    const periodPmt = monthlyPmt / div;
-    const periodVat = totalPeriods > 0 ? (totalVat / totalPeriods) : 0;
-    const standardPayment = periodPmt + periodVat;
-    const advTotal = periodPmt * advancePeriods;
-
-    // Solve for the exact period interest rate that amortizes assetCost to 0
-    const periodRate = solvePeriodRate(assetCost, periodPmt, remainingPeriods, advancePeriods);
-
-    const insAmt = (insPer / 100) * assetCost;
-    const admAmt = (admPer / 100) * assetCost;
-    const initialFees = insAmt + admAmt;
-    const totalInitialPayment = initialFees + advTotal;
-    
-    const totalRepayment = advTotal + (standardPayment * remainingPeriods);
-
-    return {
-        assetCost,
-        periodsPerYear,
-        modeLabel,
-        div,
-        totalPeriods,
-        advancePeriods,
-        remainingPeriods,
-        periodRate,
-        periodPmt,
-        advTotal,
-        totalInterest,
-        totalVat,
-        periodVat,
-        standardPayment,
-        totalRepayment,
-        insAmt,
-        admAmt,
-        initialFees,
-        totalInitialPayment
-    };
-}
-
 document.addEventListener('DOMContentLoaded', () => {
     const toggleBtn = document.getElementById('themeToggle');
     if (toggleBtn) {
@@ -248,22 +138,39 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const data = JSON.parse(rawData);
-    const details = calculateLeaseDetails(data);
-    const assetCost = details.assetCost;
-    const periodRate = details.periodRate;
-    const totalPeriods = details.totalPeriods;
-    const advancePeriods = details.advancePeriods;
-    const remainingPeriods = details.remainingPeriods;
-    const periodPmt = details.periodPmt;
-    const periodVat = details.periodVat;
-    
+    const assetCost = data.price + data.extras;
+    const monthlyRate = (data.annualRate / 100) / 12;
+    const months = data.months;
+    let advanceQty = data.advanceQty || 0;
+    if (advanceQty > months) advanceQty = months;
+
     const type = data.type || 'monthly';
+    let div = 1;
+    let modeLabel = 'Monthly';
+
+    if (type === 'weekly') { div = 4; modeLabel = 'Weekly'; }
+    else if (type === 'biweekly') { div = 2; modeLabel = 'Bi-weekly'; }
+    else if (type === 'monthly') { div = 1; modeLabel = 'Monthly'; }
+    else if (type === 'quarterly') { div = 1/3; modeLabel = 'Quarterly'; }
+    else if (type === 'yearly') { div = 1/12; modeLabel = 'Yearly'; }
+
+    let pmt = 0;
+    if (monthlyRate > 0) {
+        const factor = ((1 - Math.pow(1 + monthlyRate, -(months - advanceQty))) / monthlyRate) + advanceQty;
+        pmt = assetCost / factor;
+    } else {
+        pmt = assetCost / months;
+    }
+    
+    let totalInterest = (pmt * months) - assetCost;
+    if (totalInterest < 0) totalInterest = 0;
+    const totalVat = (data.vatPer / 100) * totalInterest;
+
     const tbody = document.getElementById('tableBody');
     let runningBalance = assetCost;
     
     let totalPrincipalSum = 0;
     let totalInterestSum = 0;
-    let totalVatSum = 0;
     let totalRepaymentSum = 0;
 
     const fNum = val => val.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
@@ -275,8 +182,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentDate = data.startDate ? new Date(data.startDate) : null;
     let disburseDate = data.disburseDate ? new Date(data.disburseDate) : null;
 
-    if (advancePeriods > 0) {
-        const advTotal = details.advTotal;
+    if (advanceQty > 0) {
+        const advTotal = pmt * advanceQty;
         totalPrincipalSum += advTotal;
         totalRepaymentSum += advTotal;
         
@@ -286,7 +193,6 @@ document.addEventListener('DOMContentLoaded', () => {
             <td>${fNum(assetCost)}</td>
             <td>${fNum(advTotal)}</td>
             <td>0.00</td>
-            <td>0.00</td>
             <td style="font-weight:700; color:var(--text-main);">${fNum(advTotal)}</td>
             <td>${fNum(assetCost - advTotal)}</td>
         </tr>`;
@@ -294,37 +200,73 @@ document.addEventListener('DOMContentLoaded', () => {
         runningBalance -= advTotal;
     }
 
-    for (let i = 1; i <= remainingPeriods; i++) {
-        let interest = runningBalance * periodRate;
-        if (periodRate === 0) interest = 0;
+    const amortMonths = months - advanceQty;
+    const monthlyInterestPer = [];
+    const monthlyPrincipalPer = [];
+    const monthlyPaymentPer = [];
+    const monthlyVatPer = totalVat / months;
+    let monthBalance = assetCost;
+    for (let m = 0; m < amortMonths; m++) {
+        let mInterest = monthBalance * monthlyRate;
+        if (monthlyRate === 0) mInterest = 0;
+        let mPrincipal = pmt - mInterest;
+        if (m === amortMonths - 1) {
+            mPrincipal = monthBalance;
+        }
+        monthlyInterestPer.push(mInterest);
+        monthlyPrincipalPer.push(mPrincipal);
+        monthlyPaymentPer.push(pmt + monthlyVatPer);
+        monthBalance -= mPrincipal;
+    }
 
-        let principal = periodPmt - interest;
-        let totalWithVat = periodPmt + periodVat;
-        let closing = runningBalance - principal;
-        
-        if (i === remainingPeriods) {
-            closing = 0;
-            principal = runningBalance; 
+    const monthsPerPeriod = 1 / div;
+    const totalOutPeriods = Math.round(amortMonths * div);
+    let periodNum = 1;
+
+    for (let p = 0; p < totalOutPeriods; p++) {
+        const startMonthFrac = p * monthsPerPeriod;
+        const endMonthFrac = (p + 1) * monthsPerPeriod;
+
+        let periodInterest = 0;
+        let periodPrincipal = 0;
+        let periodPayment = 0;
+
+        const startIdx = Math.floor(startMonthFrac);
+        const endIdx = Math.ceil(endMonthFrac);
+
+        for (let mi = startIdx; mi < endIdx && mi < amortMonths; mi++) {
+            const monthStart = Math.max(mi, startMonthFrac);
+            const monthEnd = Math.min(mi + 1, endMonthFrac);
+            const fraction = monthEnd - monthStart;
+            periodInterest += monthlyInterestPer[mi] * fraction;
+            periodPrincipal += monthlyPrincipalPer[mi] * fraction;
+            periodPayment += monthlyPaymentPer[mi] * fraction;
         }
 
-        totalPrincipalSum += principal;
-        totalInterestSum += interest;
-        totalVatSum += periodVat;
-        totalRepaymentSum += totalWithVat;
+        const isLastPeriod = (p === totalOutPeriods - 1);
+        let closing = runningBalance - periodPrincipal;
+        if (isLastPeriod) {
+            periodPrincipal = runningBalance;
+            closing = 0;
+        }
+
+        totalPrincipalSum += periodPrincipal;
+        totalInterestSum += periodInterest;
+        totalRepaymentSum += periodPayment;
 
         const row = `<tr>
-            <td>${i}</td>
+            <td>${periodNum}</td>
             <td>${fDate(currentDate)}</td>
             <td>${fNum(runningBalance)}</td>
-            <td>${fNum(principal)}</td>
-            <td>${fNum(interest)}</td>
-            <td>${fNum(periodVat)}</td>
-            <td style="font-weight:700; color:var(--text-main);">${fNum(totalWithVat)}</td>
+            <td>${fNum(periodPrincipal)}</td>
+            <td>${fNum(periodInterest)}</td>
+            <td style="font-weight:700; color:var(--text-main);">${fNum(periodPayment)}</td>
             <td>${fNum(Math.max(0, closing))}</td>
         </tr>`;
 
         tbody.innerHTML += row;
         runningBalance = closing;
+        periodNum++;
 
         if (currentDate) {
             if (type === 'weekly') currentDate.setDate(currentDate.getDate() + 7);
@@ -339,13 +281,12 @@ document.addEventListener('DOMContentLoaded', () => {
         <td colspan="3" style="text-align: right; color: var(--text-main); text-transform: uppercase;">Total:</td>
         <td style="color: var(--text-main);">${fNum(totalPrincipalSum)}</td>
         <td style="color: var(--text-main);">${fNum(totalInterestSum)}</td>
-        <td style="color: var(--text-main);">${fNum(totalVatSum)}</td>
         <td style="color: var(--primary); font-size: 1.05rem;">${fNum(totalRepaymentSum)}</td>
         <td>-</td>
     </tr>`;
     tbody.innerHTML += footerRow;
 
-    const mode = details.modeLabel;
+    const mode = modeLabel;
     document.getElementById('clientText').innerText = data.clientName ? `Client: ${data.clientName}` : '';
     document.getElementById('assetText').innerText = data.assetType ? `Asset: ${data.assetType}` : 'Lease Schedule';
     document.getElementById('summaryText').innerText = 
@@ -371,31 +312,70 @@ function shareWhatsApp() {
         return;
     }
     const data = JSON.parse(rawData);
-    const details = calculateLeaseDetails(data);
+    
+    const assetCost = data.price + data.extras;
+    const monthlyRate = (data.annualRate / 100) / 12;
+    const months = data.months;
+    let advanceQty = data.advanceQty || 0;
+    if (advanceQty > months) advanceQty = months;
+
+    const type = data.type || 'monthly';
+    let div = 1;
+    let modeName = 'Monthly';
+
+    if (type === 'weekly') { div = 4; modeName = 'Weekly'; }
+    else if (type === 'biweekly') { div = 2; modeName = 'Bi-weekly'; }
+    else if (type === 'monthly') { div = 1; modeName = 'Monthly'; }
+    else if (type === 'quarterly') { div = 1/3; modeName = 'Quarterly'; }
+    else if (type === 'yearly') { div = 1/12; modeName = 'Yearly'; }
+
+    let pmt = 0;
+    if (monthlyRate > 0) {
+        const factor = ((1 - Math.pow(1 + monthlyRate, -(months - advanceQty))) / monthlyRate) + advanceQty;
+        pmt = assetCost / factor;
+    } else {
+        pmt = assetCost / months;
+    }
+    
+    let totalInterest = (pmt * months) - assetCost;
+    if (totalInterest < 0) totalInterest = 0;
+    const totalVat = (data.vatPer / 100) * totalInterest;
     
     const fNum = val => val.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
     
-    let text = `*📊 Lease Repayment Schedule*\n\n`;
-    text += `*Asset Cost:* ${fNum(details.assetCost)}\n`;
-    text += `*Tenor:* ${data.months} Months\n`;
+    const periodPmt = pmt / div;
+    const periodVat = (totalVat / months) / div;
+    const standardPayment = periodPmt + periodVat;
+    const periods = (months - advanceQty) * div;
+    const advTotal = pmt * advanceQty;
+    const totalRepayment = advTotal + (standardPayment * periods);
 
-    text += `*Payment Mode:* ${details.modeLabel}\n\n`;
+    const insAmt = ((data.insPer || 0) / 100) * assetCost;
+    const admAmt = ((data.admPer || 0) / 100) * assetCost;
+    const initialFeesAmount = insAmt + admAmt;
+    const totalInitialPayment = initialFeesAmount + advTotal;
+
+    let text = `*📊 Lease Repayment Schedule*\n\n`;
+    text += `*Asset Cost:* ${fNum(assetCost)}\n`;
+    text += `*Tenor:* ${months} Months\n`;
+
+    text += `*Payment Mode:* ${modeName}\n\n`;
     
-    text += `*Total Initial Payment:* ${fNum(details.totalInitialPayment)}\n`;
-    if (details.advancePeriods > 0 || details.initialFees > 0) {
+    text += `*Total Initial Payment:* ${fNum(totalInitialPayment)}\n`;
+    if (advanceQty > 0 || initialFeesAmount > 0) {
         text += `_Breakdown:_\n`;
-        if (details.advancePeriods > 0) text += `* Advance Rental: ${fNum(details.advTotal)}\n`;
-        if (details.insAmt > 0) text += `* Insurance: ${fNum(details.insAmt)}\n`;
-        if (details.admAmt > 0) text += `* Admin Fee: ${fNum(details.admAmt)}\n`;
+        if (advanceQty > 0) text += `* Advance Rental: ${fNum(advTotal)}\n`;
+        if (insAmt > 0) text += `* Insurance: ${fNum(insAmt)}\n`;
+        if (admAmt > 0) text += `* Admin Fee: ${fNum(admAmt)}\n`;
     }
     text += `\n`;
     
     const vatLabel = (data.vatPer > 0) ? "(inclusive of VAT)" : "(exclusive of VAT)";
-    text += `*${details.modeLabel} Payment:* ${fNum(details.standardPayment)} ${vatLabel}\n\n`;
+    text += `*${modeName} Payment:* ${fNum(standardPayment)} ${vatLabel}\n\n`;
     
-    text += `*Total Principal:* ${fNum(details.assetCost)}\n`;
-    text += `*Total Interest:* ${fNum(details.totalInterest)}\n`;
-    text += `*Total Repayment:* ${fNum(details.totalRepayment)}\n\n`;
+    text += `*Total Principal:* ${fNum(assetCost)}\n`;
+    text += `*Total Interest:* ${fNum(totalInterest)}\n`;
+    text += `*Total Repayment:* ${fNum(totalRepayment)}\n\n`;
     
     text += `_Powered by Miss Leasing_`;
     

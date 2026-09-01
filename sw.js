@@ -1,4 +1,4 @@
-const CACHE_NAME = 'lease-calc-v5';
+const CACHE_NAME = 'lease-calc-v4';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
