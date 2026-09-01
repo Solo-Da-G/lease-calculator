@@ -223,11 +223,13 @@ function calculateReducing() {
         const totalRepayment = assetCost + totalInterest + totalVat;
 
         updateUI('r_resInitial', initialFees + advanceAmount);
+        updateUI('r_resVat', totalVat);
         updateUI('r_resInterest', totalInterest);
+        updateUI('r_resVAT', totalVat);
         updateUI('r_resTotal', totalRepayment);
         updateUI('r_resMonthly', monthlyWithVat);
     } else {
-        ['r_resInitial','r_resInterest','r_resTotal','r_resMonthly'].forEach(id => updateUI(id, 0));
+        ['r_resInitial','r_resVat','r_resInterest','r_resTotal','r_resMonthly'].forEach(id => updateUI(id, 0));
     }
 }
 
