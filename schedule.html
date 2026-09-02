@@ -105,6 +105,7 @@
                         <th>Balance B/F</th>
                         <th>Principal</th>
                         <th>Interest</th>
+                        <th>VAT</th>
                         <th>Total Payment</th>
                         <th>Balance C/F</th>
                     </tr>
@@ -175,6 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     let totalPrincipalSum = 0;
     let totalInterestSum = 0;
+    let totalVatSum = 0;
     let totalRepaymentSum = 0;
 
     const fNum = val => val.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
@@ -193,6 +195,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const advVatPart = monthlyVatPer * advanceQty;
         const advTotal = advLoanPart + advVatPart;
         totalPrincipalSum += advLoanPart;
+        totalVatSum += advVatPart;
         totalRepaymentSum += advTotal;
 
         const row = `<tr>
@@ -200,6 +203,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <td>${fDate(disburseDate || currentDate)}</td>
             <td>${fNum(assetCost)}</td>
             <td>${fNum(advLoanPart)}</td>
+            <td>0.00</td>
             <td>${fNum(advVatPart)}</td>
             <td style="font-weight:700; color:var(--text-main);">${fNum(advTotal)}</td>
             <td>${fNum(assetCost - advLoanPart)}</td>
@@ -251,7 +255,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const periodVat = monthlyVatPer * monthsPerPeriod;
-        const periodInterestVatInclusive = periodInterest + periodVat;
         const periodPaymentVatInclusive = periodPayment + periodVat;
 
         const isLastPeriod = (p === totalOutPeriods - 1);
@@ -262,7 +265,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         totalPrincipalSum += periodPrincipal;
-        totalInterestSum += periodInterestVatInclusive;
+        totalInterestSum += periodInterest;
+        totalVatSum += periodVat;
         totalRepaymentSum += periodPaymentVatInclusive;
 
         const row = `<tr>
@@ -270,7 +274,8 @@ document.addEventListener('DOMContentLoaded', () => {
             <td>${fDate(currentDate)}</td>
             <td>${fNum(runningBalance)}</td>
             <td>${fNum(periodPrincipal)}</td>
-            <td>${fNum(periodInterestVatInclusive)}</td>
+            <td>${fNum(periodInterest)}</td>
+            <td>${fNum(periodVat)}</td>
             <td style="font-weight:700; color:var(--text-main);">${fNum(periodPaymentVatInclusive)}</td>
             <td>${fNum(Math.max(0, closing))}</td>
         </tr>`;
@@ -289,12 +294,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const footerTotalPrincipal = assetCost;
-    const footerTotalInterestVatInclusive = totalInterest + totalVat;
+    const footerTotalInterest = totalInterest;
+    const footerTotalVat = totalVat;
     const footerTotalRepayment = assetCost + totalInterest + totalVat;
     const footerRow = `<tr style="font-weight: 800; background: rgba(0,0,0,0.02); box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);">
         <td colspan="3" style="text-align: right; color: var(--text-main); text-transform: uppercase;">Total:</td>
         <td style="color: var(--text-main);">${fNum(footerTotalPrincipal)}</td>
-        <td style="color: var(--text-main);">${fNum(footerTotalInterestVatInclusive)}</td>
+        <td style="color: var(--text-main);">${fNum(footerTotalInterest)}</td>
+        <td style="color: var(--text-main);">${fNum(footerTotalVat)}</td>
         <td style="color: var(--primary); font-size: 1.05rem;">${fNum(footerTotalRepayment)}</td>
         <td>-</td>
     </tr>`;
@@ -315,20 +322,26 @@ document.addEventListener('DOMContentLoaded', () => {
     const periodLoanPmt = pmt / div;
     const periodVatPmt = (totalVat / months) / div;
     const periodActualPmt = periodLoanPmt + periodVatPmt;
-    const interestPlusVat = totalInterest + totalVat;
     const totalGrand = assetCost + totalInterest + totalVat;
 
     let vatMsg = '';
     vatMsg += `<strong>Total Interest:</strong> ${fNum(totalInterest)}`;
     if (totalVat > 0 || data.vatPer > 0) {
         vatMsg += `&nbsp;&nbsp;+&nbsp;&nbsp;<strong>VAT (${fNum(data.vatPer)}%):</strong> ${fNum(totalVat)}`;
-        vatMsg += `<br><strong>Interest + VAT:</strong> ${fNum(interestPlusVat)}`;
-        vatMsg += `&nbsp;&nbsp;→&nbsp;&nbsp;<strong>Grand Total (Cost + Interest + VAT):</strong> ${fNum(totalGrand)}`;
-        vatMsg += `<br><strong>Actual ${mode} Payment (inclusive of VAT):</strong> ${fNum(periodActualPmt)}`;
+        vatMsg += `<br><strong>Grand Total (Cost + Interest + VAT):</strong> ${fNum(totalGrand)}`;
+        vatMsg += `<br><strong>${mode} Breakdown:</strong> Principal portion ${fNum(periodLoanPmt)} + VAT portion ${fNum(periodVatPmt)}`;
+        vatMsg += `&nbsp;→&nbsp;<strong>${mode} Total:</strong> ${fNum(periodActualPmt)} (inc. VAT)`;
         if (advanceQty > 0) {
             const advLoan = pmt * advanceQty;
             const advVat = (totalVat / months) * advanceQty;
-            vatMsg += `&nbsp;&nbsp;·&nbsp;&nbsp;<strong>Advance Rental (${advanceQty} mo, inc. VAT):</strong> ${fNum(advLoan + advVat)}`;
+            vatMsg += `<br><strong>Advance Rental (${advanceQty} mo):</strong> ${fNum(advLoan)} + VAT ${fNum(advVat)} = <strong>${fNum(advLoan + advVat)}</strong>`;
+        }
+    } else {
+        vatMsg += `<br><strong>Total Repayment (Cost + Interest):</strong> ${fNum(totalGrand)}`;
+        vatMsg += `<br><strong>${mode} Payment:</strong> ${fNum(periodLoanPmt)}`;
+        if (advanceQty > 0) {
+            const advLoan = pmt * advanceQty;
+            vatMsg += `&nbsp;&nbsp;·&nbsp;&nbsp;<strong>Advance Rental (${advanceQty} mo):</strong> ${fNum(advLoan)}`;
         }
     }
     if (vatMsg) {
@@ -415,10 +428,11 @@ function shareWhatsApp() {
     const vatLabel = (data.vatPer > 0) ? "(inclusive of VAT)" : "(exclusive of VAT)";
     text += `*${modeName} Payment:* ${fNum(standardPayment)} ${vatLabel}\n\n`;
     
-    const totalInterestVatInclusive = totalInterest + totalVat;
-    const interestLabel = (data.vatPer > 0) ? `Total Interest (incl. ${data.vatPer}% VAT)` : `Total Interest`;
     text += `*Total Principal:* ${fNum(assetCost)}\n`;
-    text += `*${interestLabel}:* ${fNum(totalInterestVatInclusive)}\n`;
+    text += `*Total Interest:* ${fNum(totalInterest)}\n`;
+    if (data.vatPer > 0 || totalVat > 0) {
+        text += `*Total VAT (${fNum(data.vatPer)}%):* ${fNum(totalVat)}\n`;
+    }
     text += `*Total Repayment:* ${fNum(totalRepayment)}\n\n`;
     
     text += `_Powered by Miss Leasing_`;
